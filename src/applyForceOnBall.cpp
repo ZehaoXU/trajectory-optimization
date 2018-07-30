@@ -97,12 +97,44 @@ void scroll(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 // apply force on the ball by set d -> ctrl
-void applyForceOnModel(const mjModel* m, mjData* d)
-{
+void applyForceByModifyDctrl(const mjModel* m, mjData* d)
+{   
+    // 1. modify d -> ctrl
     if (d -> time > 20 && d -> time < 30)
         d -> ctrl[1] = {-40.0};
-    if (d -> time >=30)
+    if (d -> time >=30 && d -> time < 50)
         d -> ctrl[1] = {40.0};
+    if (d -> time >= 50 && d -> time <60)
+        d -> ctrl[1] = {-40.0};
+     if (d -> time >= 60)
+        d -> ctrl[1] = {0};
+}
+
+void applyForceByModifyDqfrc_applied(const mjModel* m, mjData* d)
+{
+    // 2. modify d -> qfrc_applied, nv * 1
+    if (d -> time > 20 && d -> time < 30)
+        d -> qfrc_applied[3] = {-40.0};
+    if (d -> time >=30 && d -> time < 50)
+        d -> qfrc_applied[3] = {40.0};
+    if (d -> time >= 50 && d -> time <60)
+        d -> qfrc_applied[3] = {-40.0};
+    if (d -> time >= 60)
+        d -> qfrc_applied[3] = {0};
+}
+
+void applyForceByModifyDxfrc_applied(const mjModel* m, mjData* d)
+{
+    // 3. modify d -> xfrc_applied, nbody * 6
+    // xfrc_applied: 6 - left, 7 - up, 9 - down, 10 - right
+    if (d -> time > 20 && d -> time < 30)
+        d -> xfrc_applied[7] = {-40.0};
+    if (d -> time >=30 && d -> time < 50)
+        d -> xfrc_applied[7] = {40.0};
+    if (d -> time >= 50 && d -> time <60)
+        d -> xfrc_applied[7] = {-40.0};
+    if (d -> time >= 60)
+        d -> xfrc_applied[7] = {0};
 }
 
 // main function
@@ -154,8 +186,9 @@ int main(int argc, const char** argv)
 
     // print some arguments
     // m -> nu = 2;
-    std::cout << m->nu << std::endl;
-    std::cout << d->ctrl << std::endl;
+    // std::cout << m -> nu << std::endl;
+    // std::cout << m -> nv << std::endl;
+    // std::cout << d -> ctrl << std::endl;
 
     // run main loop, target real-time simulation and 60 fps rendering
     while( !glfwWindowShouldClose(window) )
@@ -165,11 +198,11 @@ int main(int argc, const char** argv)
         //  this loop will finish on time for the next frame to be rendered at 60 fps.
         //  Otherwise add a cpu timer and exit this loop when it is time to render.
         mjtNum simstart = d->time;
-        while( (d->time - simstart < 1.0/60.0) && (d->time < 50) )
+        while( d->time - simstart < 1.0/60.0)
         {
             mj_step1(m, d);
-            applyForceOnModel(m, d);
-            std::cout << m -> nu << "  " << d -> ctrl[0] << std::endl;
+            applyForceByModifyDxfrc_applied(m, d);
+            std::cout << m -> nu << "  " << m -> nv << "  " << m -> nbody << std::endl;
             std::cout << d -> time << std::endl;
             mj_step2(m, d);
         }

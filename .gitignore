@@ -3,6 +3,7 @@
 *build1/
 *__pycache__*
 .DS_Store
+*.vscode
 
 # Don't push local properties
 cmake/LocalProperties.cmake
