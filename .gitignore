@@ -1,5 +1,6 @@
 *.sw*
 *build/
+*build1/
 *__pycache__*
 .DS_Store
 

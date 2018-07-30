@@ -14,11 +14,13 @@ project(TrajectoryOptimization VERSION 0.9.1 LANGUAGES CXX)
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 # UNCOMMENT THESE TO ENABLE USING MUJOCO
-# # Load local dependency paths
-# include(cmake/LocalProperties.cmake)
-# find_package(Mujoco REQUIRED MODULE)
+# Load local dependency paths
+include(cmake/LocalProperties.cmake)
+find_package(Mujoco REQUIRED MODULE)
 
 find_package(Ipopt REQUIRED MODULE)
+#set(IPOPT_LIBRARIES ${IPOPT_DIR}/lib)
+
 find_package(Rangev3 REQUIRED MODULE)
 
 add_library(trajectoryOptimizationLib INTERFACE)
@@ -28,9 +30,11 @@ add_library(TrajectoryOptimization::TrajectoryOptimizationLib ALIAS trajectoryOp
 target_include_directories(trajectoryOptimizationLib INTERFACE
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
 	$<INSTALL_INTERFACE:include>
+	${IPOPT_DIR}/include
+	~/.mujoco/mjpro150/include
 )
 target_link_libraries(trajectoryOptimizationLib INTERFACE
-	Ipopt::Ipopt Rangev3::Rangev3
+	Ipopt::Ipopt Rangev3::Rangev3 Mujoco::Mujoco
 )
 
 if (traj_opt_build_tests)
@@ -39,10 +43,14 @@ if (traj_opt_build_tests)
 endif()
 
 if (traj_opt_build_samples)
-	add_executable(trajectoryOptimizationSample src/trajectoryOptimizationMain.cpp)
-	target_link_libraries(trajectoryOptimizationSample
+	add_executable(123 src/applyForceOnBall.cpp)
+	message(${IPOPT_FOUND})
+	message(${IPOPT_INCLUDE_DIRS})
+	message(${IPOPT_DIR})
+	#target_include_directories(trajectoryOptimizationSample PRIVATE ${IPOPT_DIR}/include)
+	target_link_libraries(123
 		PUBLIC
-			Ipopt::Ipopt Rangev3::Rangev3
+			Ipopt::Ipopt Rangev3::Rangev3 Mujoco::Mujoco
 		PRIVATE
 			trajectoryOptimizationLib
 	)
