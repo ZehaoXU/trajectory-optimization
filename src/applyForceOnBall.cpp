@@ -137,6 +137,40 @@ void applyForceByModifyDxfrc_applied(const mjModel* m, mjData* d)
         d -> xfrc_applied[7] = {0};
 }
 
+// using mj_applyFT function 
+bool flag1 = 0, flag2 = 0, flag3 = 0;
+void applyForceByMj_applyFT(const mjModel* m, mjData* d)
+{
+    mjtNum force[3] = {};
+    
+    if ((d -> time > 20) && (flag1 == 0))
+    {
+        force[1] = -100;
+        flag1 = 1;
+    }
+    else if (d -> time > 30 && flag2 == 0)
+    {
+        force[1] = 200;
+        flag2 = 1;
+    }
+    else if (d -> time > 50 && flag3 == 0)
+    {
+        force[1] = -200;
+        flag3 = 1;
+    }
+    else
+        force[1] = 0;
+    if (d -> time > 60)
+        d->qfrc_applied[1] = 0;
+    mjtNum torque[3] = {};
+    mjtNum point[3] = {0,0,0};
+    int body = 1;
+    std::cout << "force: " << force[0] << std::endl;
+    mju_zero(d->qfrc_applied + 3, 3);
+    mj_applyFT(m, d, force, torque, point, body, d->qfrc_applied);
+
+}
+
 // main function
 int main(int argc, const char** argv)
 {
@@ -198,13 +232,19 @@ int main(int argc, const char** argv)
         //  this loop will finish on time for the next frame to be rendered at 60 fps.
         //  Otherwise add a cpu timer and exit this loop when it is time to render.
         mjtNum simstart = d->time;
+        
         while( d->time - simstart < 1.0/60.0)
         {
-            mj_step1(m, d);
-            applyForceByModifyDxfrc_applied(m, d);
-            std::cout << m -> nu << "  " << m -> nv << "  " << m -> nbody << std::endl;
-            std::cout << d -> time << std::endl;
-            mj_step2(m, d);
+            // mj_step1(m, d);
+            // applyForceByModifyDxfrc_applied(m, d);
+            // std::cout << m -> nu << "  " << m -> nv << "  " << m -> nbody << std::endl;
+            // std::cout << d -> time << std::endl;
+            // mj_step2(m, d);
+            applyForceByMj_applyFT(m, d);
+            std::cout << d->qfrc_applied[0] << "  " << d->qfrc_applied[1] << "  " << d->qfrc_applied[2] << "  "
+                << d->qfrc_applied[3] << "  " << d->qfrc_applied[4] << "  " << d->qfrc_applied[5] << std::endl;
+            std::cout << d->time << std::endl;
+            mj_step(m, d);
         }
 
 
