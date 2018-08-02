@@ -110,17 +110,17 @@ void applyForceByModifyDctrl(const mjModel* m, mjData* d)
         d -> ctrl[1] = {0};
 }
 
-void applyForceByModifyDqfrc_applied(const mjModel* m, mjData* d)
+void applyForceByModifyDqfrc_applied(const mjModel* m, mjData* d, double force, int direction)
 {
     // 2. modify d -> qfrc_applied, nv * 1
     if (d -> time > 20 && d -> time < 30)
-        d -> qfrc_applied[3] = {-40.0};
+        d -> qfrc_applied[direction] = {-1 * force};
     if (d -> time >=30 && d -> time < 50)
-        d -> qfrc_applied[3] = {40.0};
-    if (d -> time >= 50 && d -> time <60)
-        d -> qfrc_applied[3] = {-40.0};
-    if (d -> time >= 60)
-        d -> qfrc_applied[3] = {0};
+        d -> qfrc_applied[direction] = {0};
+    // if (d -> time >= 50 && d -> time <60)
+    //     d -> qfrc_applied[direction] = {-1 * force};
+    // if (d -> time >= 60)
+    //     d -> qfrc_applied[direction] = {0};
 }
 
 void applyForceByModifyDxfrc_applied(const mjModel* m, mjData* d)
@@ -168,7 +168,6 @@ void applyForceByMj_applyFT(const mjModel* m, mjData* d)
     std::cout << "force: " << force[0] << std::endl;
     mju_zero(d->qfrc_applied + 3, 3);
     mj_applyFT(m, d, force, torque, point, body, d->qfrc_applied);
-
 }
 
 // main function
@@ -192,6 +191,9 @@ int main(int argc, const char** argv)
         m = mj_loadXML(argv[1], 0, error, 1000);
     if( !m )
         mju_error_s("Load model error: %s", error);
+
+    // set mass
+    mj_setTotalmass(m, 100);
 
     // make data
     d = mj_makeData(m);
@@ -235,16 +237,16 @@ int main(int argc, const char** argv)
         
         while( d->time - simstart < 1.0/60.0)
         {
-            // mj_step1(m, d);
-            // applyForceByModifyDxfrc_applied(m, d);
-            // std::cout << m -> nu << "  " << m -> nv << "  " << m -> nbody << std::endl;
-            // std::cout << d -> time << std::endl;
-            // mj_step2(m, d);
-            applyForceByMj_applyFT(m, d);
-            std::cout << d->qfrc_applied[0] << "  " << d->qfrc_applied[1] << "  " << d->qfrc_applied[2] << "  "
-                << d->qfrc_applied[3] << "  " << d->qfrc_applied[4] << "  " << d->qfrc_applied[5] << std::endl;
-            std::cout << d->time << std::endl;
-            mj_step(m, d);
+            mj_step1(m, d);
+            applyForceByModifyDqfrc_applied(m, d, 10, 2);
+            std::cout << d->qacc[0] << "  " << d->qacc[1] << "  " << d->qacc[2] << std::endl;
+            std::cout << d -> time << std::endl;
+            mj_step2(m, d);
+            // applyForceByMj_applyFT(m, d);
+            // std::cout << d->qfrc_applied[0] << "  " << d->qfrc_applied[1] << "  " << d->qfrc_applied[2] << "  "
+            //     << d->qfrc_applied[3] << "  " << d->qfrc_applied[4] << "  " << d->qfrc_applied[5] << std::endl;
+            // std::cout << d->time << std::endl;
+            // mj_step(m, d);
         }
 
 

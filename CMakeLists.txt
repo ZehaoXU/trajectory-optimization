@@ -43,7 +43,7 @@ if (traj_opt_build_tests)
 endif()
 
 if (traj_opt_build_samples)
-	add_executable(123 src/applyForceOnBall.cpp)
+	add_executable(123 test/src/mujocoDynamicTest.cpp)
 	message(${IPOPT_FOUND})
 	message(${IPOPT_INCLUDE_DIRS})
 	message(${IPOPT_DIR})
