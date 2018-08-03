@@ -3,13 +3,14 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
-#include "trajectoryOptimization/mujocoDynamic.hpp"
 #include "mujoco.h"
+#include "trajectoryOptimization/mujocoDynamic.hpp"
+
 
 
 // using namespace testing;
 using namespace trajectoryOptimization::mujocoDynamic;
-using namespace std;
+using namespace std;    // take care
 
 mjModel* m = NULL;
 mjData* d = NULL;
@@ -25,7 +26,7 @@ int main(int argc, const char ** argv)
     mj_activate("mjkey.txt");
 
     // load and compile model
-    char error[1000] = "could not load binary model";
+    char error[1000] = "could not load binary model"; // string, memory leak
     if( strlen(argv[1])>4 && !strcmp(argv[1]+strlen(argv[1])-4, ".mjb") )
         m = mj_loadModel(argv[1], 0);
     else
