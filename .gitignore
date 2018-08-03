@@ -4,6 +4,7 @@
 *__pycache__*
 .DS_Store
 *.vscode
+include/trajectoryOptimization/mujocoDynamic.hpp
 
 # Don't push local properties
 cmake/LocalProperties.cmake
