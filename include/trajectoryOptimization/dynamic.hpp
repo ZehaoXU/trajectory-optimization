@@ -6,6 +6,7 @@
 #include <cassert>
 #include <functional>
 #include <range/v3/view.hpp>
+#include "mujoco.h"
 
 namespace trajectoryOptimization::dynamic {
 	using dvector = std::vector<double>;
@@ -51,34 +52,37 @@ namespace trajectoryOptimization::dynamic {
 		const int worldDimension;
 		const double dt;
 	public:
-		GetNextPositionVelocityUsingMujoco(const mjModel* model, mjData* data, const int dimension, const double dTime):
+		GetNextPositionVelocityUsingMujoco(const mjModel* model, mjData* data, const int dimension = 3, const double dTime = 0.5):
 			worldDimension(dimension), dt(dTime)
 			{
 				m = mj_copyModel(NULL, model);
 				d = mj_copyData(NULL, m, data);
-			}
+			}		
+
 		std::tuple<dvector, dvector> operator()(const double* position,
 												const double* velocity,
 												const double* control)
 		{
 			mju_copy(d->qpos, position, worldDimension); 
 			mju_copy(d->qvel, velocity, worldDimension);
-
+			
 			mjtNum startTime = d->time;
 			while(d->time - startTime < dt)
 			{
-				mj_step1(m, d);
-				mju_copy(d->ctrl, control, 3);
-				mj_step2(m, d);
+				mju_copy(d->ctrl, control, worldDimension);
+				mj_step(m, d);
+				std::cout << d->time << "  " << startTime << std::endl;
+				std::cout << d->qacc[0] << "  " << d->qacc[1] << std::endl;
 			}
 			
-			dvector nextPosition(d->qpos, d->qpos + 3);
-			dvector nextVelocity(d->qvel, d->qvel + 3);
+			dvector nextPosition(d->qpos, d->qpos + worldDimension);
+			dvector nextVelocity(d->qvel, d->qvel + worldDimension);
 
 			mj_resetData(m, d);
 
 			return {nextPosition, nextVelocity};
 		}
+
 	};
 
 }

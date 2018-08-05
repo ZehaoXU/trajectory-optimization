@@ -35,7 +35,7 @@ int main(int argc, const char ** argv)
         mju_error_s("Load model error: %s", error);
 
     // set mass = 10
-    mj_setTotalmass(m, 10);
+    mj_setTotalmass(m, 1);
 
     d = mj_makeData(m);
 
@@ -45,7 +45,7 @@ int main(int argc, const char ** argv)
 
     // qpos=nq=7, qvel=nv=6, ctrl=nu=0, qfrc_applied=nv=6
     
-    dvector position = {1,2,0.2};
+    dvector position = {1,2,0};
     dvector velocity = {2,2,0};
     dvector control = {1,2,0};
 
