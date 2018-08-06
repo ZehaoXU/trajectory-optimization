@@ -1,3 +1,0 @@
-/home/jasper/project/lib/trajectoryOptimization/cmake/CMakeFiles/edit_cache.dir
-/home/jasper/project/lib/trajectoryOptimization/cmake/CMakeFiles/rebuild_cache.dir
-/home/jasper/project/lib/trajectoryOptimization/cmake/CMakeFiles/123.dir
