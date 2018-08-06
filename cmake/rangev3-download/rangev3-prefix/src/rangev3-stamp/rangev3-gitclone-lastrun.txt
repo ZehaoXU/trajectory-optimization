@@ -1,3 +1,0 @@
-repository='https://github.com/ericniebler/range-v3.git'
-module=''
-tag=''

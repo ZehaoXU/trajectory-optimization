@@ -43,7 +43,6 @@ TEST_F(MujocoTest, controlVelocityZero)
     
     EXPECT_THAT(position, nextPosition);
     EXPECT_THAT(velocity, nextVelocity);
-
 }
 
 TEST_F(MujocoTest, controlZero) 
@@ -57,12 +56,13 @@ TEST_F(MujocoTest, controlZero)
                                     velocity.data(),
                                     control.data());
     
-    EXPECT_THAT(nextPosition, ElementsAre(2, 3, 0));
+    EXPECT_NEAR(nextPosition[0], 2, 1e-5);
+    EXPECT_NEAR(nextPosition[1], 3, 1e-5);
+    EXPECT_NEAR(nextPosition[2], 0, 1e-5);
     EXPECT_THAT(nextVelocity, ElementsAre(2, 2, 0));
-
 }
 
-TEST_F(MujocoTest, controlOne)  // failed!
+TEST_F(MujocoTest, controlOne) 
 {
     dvector position = {1, 2, 0};
     dvector velocity = {2, 2, 0};
@@ -73,11 +73,32 @@ TEST_F(MujocoTest, controlOne)  // failed!
                                     velocity.data(),
                                     control.data());
     
-    EXPECT_THAT(nextPosition, ElementsAre(2.125, 3, 0));
-    EXPECT_THAT(nextVelocity, ElementsAre(2.5, 2, 0));
-
+    EXPECT_NEAR(nextPosition[0], 2.125, 1e-5);
+    EXPECT_NEAR(nextPosition[1], 3, 1e-5);
+    EXPECT_NEAR(nextPosition[2], 0, 1e-5);
+    EXPECT_NEAR(nextVelocity[0], 2.5, 1e-5);
+    EXPECT_NEAR(nextVelocity[1], 2, 1e-5);
+    EXPECT_NEAR(nextVelocity[2], 0, 1e-5);
 }
 
+TEST_F(MujocoTest, controlOneTwo) 
+{
+    dvector position = {1, 2, 0};
+    dvector velocity = {2, 2, 0};
+    dvector control = {1, 2, 0};
+
+    auto getNextPosVel = GetNextPositionVelocityUsingMujoco(_m, _d);
+    auto [nextPosition, nextVelocity] = getNextPosVel(position.data(),
+                                    velocity.data(),
+                                    control.data());
+    
+    EXPECT_NEAR(nextPosition[0], 2.125, 1e-5);
+    EXPECT_NEAR(nextPosition[1], 3.25, 1e-5);
+    EXPECT_NEAR(nextPosition[2], 0, 1e-5);
+    EXPECT_NEAR(nextVelocity[0], 2.5, 1e-5);
+    EXPECT_NEAR(nextVelocity[1], 3, 1e-5);
+    EXPECT_NEAR(nextVelocity[2], 0, 1e-5);
+}
 
 int main(int argc, char** argv)
 {

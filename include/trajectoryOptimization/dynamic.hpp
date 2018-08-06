@@ -52,7 +52,9 @@ namespace trajectoryOptimization::dynamic {
 		const int worldDimension;
 		const double dt;
 	public:
-		GetNextPositionVelocityUsingMujoco(const mjModel* model, mjData* data, const int dimension = 3, const double dTime = 0.5):
+		GetNextPositionVelocityUsingMujoco(const mjModel* model, mjData* data, 
+										const int dimension = 3, 
+										const double dTime = 0.5):
 			worldDimension(dimension), dt(dTime)
 			{
 				m = mj_copyModel(NULL, model);
@@ -71,8 +73,6 @@ namespace trajectoryOptimization::dynamic {
 			{
 				mju_copy(d->ctrl, control, worldDimension);
 				mj_step(m, d);
-				std::cout << d->time << "  " << startTime << std::endl;
-				std::cout << d->qacc[0] << "  " << d->qacc[1] << std::endl;
 			}
 			
 			dvector nextPosition(d->qpos, d->qpos + worldDimension);
