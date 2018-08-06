@@ -5,6 +5,7 @@
 .DS_Store
 *.vscode
 include/trajectoryOptimization/mujocoDynamic.hpp
+test/src/mujocoDynamicTest.cpp
 
 # Don't push local properties
 cmake/LocalProperties.cmake
