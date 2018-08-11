@@ -30,7 +30,7 @@ int main(int argv, char* argc[])
   const int controlDimension = worldDimension;
   const int timePointDimension = kinematicDimension + controlDimension;
   const int numTimePoints = 50;
-  const int timeStepSize = 1;
+  const double timeStepSize = 0.5;
   std::cout << "loading model \n";
   mjModel* m = NULL;
   mjData* d = NULL;
@@ -73,7 +73,7 @@ int main(int argv, char* argc[])
                                                               startPoint));
   std::cout << "1\n";
   const unsigned randomTargetTimeIndex = 25;
-  const std::vector<double> randomTarget = {-10, 20, 30, 0, 0, 0, -10, 20, 30};
+  const std::vector<double> randomTarget = {-10, 20, 30, 0, 0, 0, 0, 0, 0};
   constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
                                                               timePointDimension,
                                                               kinematicDimension,

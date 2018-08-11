@@ -6,6 +6,7 @@
 *.vscode
 include/trajectoryOptimization/mujocoDynamic.hpp
 test/src/mujocoDynamicTest.cpp
+src/trajOld.cpp
 
 # Don't push local properties
 cmake/LocalProperties.cmake
