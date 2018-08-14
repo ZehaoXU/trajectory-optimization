@@ -15,6 +15,7 @@ public:
         // load and compile model
         char error[1000] = "ERROR: could not load binary model!";
         _m = mj_loadXML("../../model/ball.xml", 0, error, 1000);
+        _m->opt.timestep = 0.00001;
         _d = mj_makeData(_m);
     }
 

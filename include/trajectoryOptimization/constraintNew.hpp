@@ -5,7 +5,7 @@
 #include <iterator>
 #include <functional>
 #include <range/v3/all.hpp>
-#include "dynamic.hpp"
+#include "dynamicNew.hpp"
 #include "derivative.hpp"
 #include "utilities.hpp"
 

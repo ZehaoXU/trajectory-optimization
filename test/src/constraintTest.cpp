@@ -183,6 +183,44 @@ TEST_F(blockDynamic, twoTimeStepsViolationUsingApplyFunction){
 							ElementsAre(-0.125, -0.25, -0.25, -0.5, -1, -1.75, -0.25, -1.25));
 }
 
+class mujocoDynamics:public::Test{
+	protected:
+		const unsigned numberOfPoints = 3;    
+		const unsigned pointDimension = 6;  
+		const unsigned kinematicDimension = 4;
+		unsigned positionDimension;
+		unsigned velocityDimension;
+		const double dt = 0.5;
+		std::vector<double> trajectory;
+		const double* trajectoryPtr;
+
+		mjModel* _m;
+		mjData* _d;
+	
+		virtual void SetUp() override
+		{
+			std::vector<double> point1 = {0, 0, 3, 4, 1, 2};
+			std::vector<double> point2 = {1.5, 2, 3.5, 5, 2, 4};
+			std::vector<double> point3 = {2.5, 3, 4.5, 6, 3, 5};
+			positionDimension = kinematicDimension/2;
+			velocityDimension = positionDimension;
+			trajectory = yield_from(view::concat(point1, point2, point3));
+			assert (trajectory.size() == numberOfPoints*pointDimension);
+			trajectoryPtr = trajectory.data();
+
+			 mj_activate("../../mjkey.txt");    
+			char error[1000] = "ERROR: could not load binary model!";
+			_m = mj_loadXML("../../model/ball.xml", 0, error, 1000);
+			_m->opt.timestep = 0.00001;
+			_d = mj_makeData(_m);
+		}
+		void TearDown() override
+		{
+			mj_deleteData(_d);
+			mj_deleteModel(_m);
+			mj_deactivate();
+		}
+};
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

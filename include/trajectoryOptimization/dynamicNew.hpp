@@ -10,16 +10,9 @@
 
 namespace trajectoryOptimization::dynamic {
 	using dvector = std::vector<double>;
-	using DynamicFunctionBlock = std::function<const double* (const double*,
-													const unsigned,
-													const double*,
-													const unsigned,
-													const double*,
-													const unsigned)>;
-	using DynamicFunctionMujoco = std::function<std::tuple <dvector, dvector> (const double*,
+	using DynamicFunction = std::function<std::tuple <dvector, dvector> (const double*,
 													const double*,
 													const double*)>;
-
 	using namespace ranges;
 
 	const double* BlockDynamics(const double* position,

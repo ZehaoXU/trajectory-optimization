@@ -9,7 +9,7 @@
 #include "trajectoryOptimization/constraintNew.hpp"
 #include "trajectoryOptimization/cost.hpp"
 #include "trajectoryOptimization/derivative.hpp"
-#include "trajectoryOptimization/dynamic.hpp"
+#include "trajectoryOptimization/dynamicNew.hpp"
 #include "trajectoryOptimization/optimizer.hpp"
 #include "trajectoryOptimization/utilities.hpp"
 
@@ -31,7 +31,7 @@ int main(int argv, char* argc[])
   const int timePointDimension = kinematicDimension + controlDimension;
   const int numTimePoints = 50;
   const double timeStepSize = 0.5;
-  std::cout << "loading model \n";
+  
   mjModel* m = NULL;
   mjData* d = NULL;
   mj_activate("../mjkey.txt");    
@@ -39,8 +39,8 @@ int main(int argv, char* argc[])
   char error[1000] = "ERROR: could not load binary model!";
   m = mj_loadXML("../model/ball.xml", 0, error, 1000);
   d = mj_makeData(m);
+  
   const dynamic::DynamicFunction mujocoDynamics = dynamic::GetNextPositionVelocityUsingMujoco(m, d, worldDimension, timeStepSize);
-  std::cout<<"successfully load model \n";
 
   const int numberVariablesX = timePointDimension * numTimePoints;
 
@@ -71,7 +71,7 @@ int main(int argv, char* argc[])
                                                               kinematicDimension,
                                                               startTimeIndex,
                                                               startPoint));
-  std::cout << "1\n";
+  
   const unsigned randomTargetTimeIndex = 25;
   const std::vector<double> randomTarget = {-10, 20, 30, 0, 0, 0, 0, 0, 0};
   constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
@@ -79,7 +79,7 @@ int main(int argv, char* argc[])
                                                               kinematicDimension,
                                                               randomTargetTimeIndex,
                                                               randomTarget));
-  std::cout << "2\n";
+  
   const unsigned kinematicViolationConstraintStartIndex = 0;
   const unsigned kinematicViolationConstraintEndIndex = kinematicViolationConstraintStartIndex + numTimePoints - 1;
   constraints = constraint::applyKinematicViolationConstraints(constraints,
@@ -89,13 +89,13 @@ int main(int argv, char* argc[])
                                                                 kinematicViolationConstraintStartIndex,
                                                                 kinematicViolationConstraintEndIndex,
                                                                 timeStepSize);
-  std::cout << "3\n";                
+                  
   constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
                                                                 timePointDimension,
                                                                 kinematicDimension,
                                                                 goalTimeIndex,
                                                                 goalPoint));
-  std::cout << "4\n";
+  
   const constraint::ConstraintFunction stackedConstraintFunction = constraint::StackConstriants(numberVariablesX, constraints);
   const unsigned numberConstraintsG = stackedConstraintFunction(xStartingPoint.data()).size();
   const numberVector gLowerBounds(numberConstraintsG);
@@ -103,7 +103,7 @@ int main(int argv, char* argc[])
   EvaluateConstraintFunction constraintFunction = [stackedConstraintFunction](Index n, const Number* x, Index m) {
     return stackedConstraintFunction(x);
   };
-  std::cout << "5\n";
+  
   indexVector jacStructureRows, jacStructureCols;
   constraint::ConstraintGradientFunction evaluateJacobianValueFunction;
   std::tie(jacStructureRows, jacStructureCols, evaluateJacobianValueFunction) =
@@ -115,7 +115,7 @@ int main(int argv, char* argc[])
     return evaluateJacobianValueFunction(x);
   };
 
-  std::cout << "6\n";
+  
   const int numberNonzeroHessian = 0;
   indexVector hessianStructureRows;
   indexVector hessianStructureCols;
@@ -126,7 +126,7 @@ int main(int argv, char* argc[])
     numberVector values;
     return values;
   };
-  std::cout << "7\n";
+  
   FinalizerFunction finalizerFunction = [&](SolverReturn status, Index n, const Number* x,
                         const Number* zLower, const Number* zUpper,
                         Index m, const Number* g, const Number* lambda,
@@ -148,7 +148,7 @@ int main(int argv, char* argc[])
     printf("\n\nObjective value\n");
     printf("f(x*) = %e\n", objValue); 
   };
-  std::cout << "8\n";
+ 
   SmartPtr<TNLP> trajectoryOptimizer = new TrajectoryOptimizer(numberVariablesX,
                         numberConstraintsG,
                         numberNonzeroJacobian,
@@ -170,11 +170,11 @@ int main(int argv, char* argc[])
                         finalizerFunction);
 
   SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
-  std::cout << "9\n";
+  
   app->Options()->SetNumericValue("tol", 1e-9);
   app->Options()->SetStringValue("mu_strategy", "adaptive");
   app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-  std::cout << "10\n";
+  
   ApplicationReturnStatus status;
   status = app->Initialize();
   if (status != Solve_Succeeded) {
@@ -191,6 +191,6 @@ int main(int argv, char* argc[])
       std::cout << std::endl << std::endl << "*** The final value of the objective function is " << final_obj << '.' << std::endl;
     }
   }
-  std::cout << "11\n";
+  
   utilities::plotTrajectory(worldDimension, positionFilename, velocityFilename, controlFilename);
 }

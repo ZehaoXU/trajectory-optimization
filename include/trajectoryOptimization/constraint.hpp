@@ -180,3 +180,5 @@ namespace trajectoryOptimization::constraint {
 		}
 }
 
+// block dynamics
+// violation calculate
