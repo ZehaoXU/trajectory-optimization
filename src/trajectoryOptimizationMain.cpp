@@ -9,7 +9,7 @@
 #include "trajectoryOptimization/constraintNew.hpp"
 #include "trajectoryOptimization/cost.hpp"
 #include "trajectoryOptimization/derivative.hpp"
-#include "trajectoryOptimization/dynamicNew.hpp"
+#include "trajectoryOptimization/dynamic.hpp"
 #include "trajectoryOptimization/optimizer.hpp"
 #include "trajectoryOptimization/utilities.hpp"
 
@@ -30,7 +30,7 @@ int main(int argv, char* argc[])
   const int controlDimension = worldDimension;
   const int timePointDimension = kinematicDimension + controlDimension;
   const int numTimePoints = 50;
-  const double timeStepSize = 0.5;
+  const double timeStepSize = 1;
   
   mjModel* m = NULL;
   mjData* d = NULL;
@@ -40,7 +40,7 @@ int main(int argv, char* argc[])
   m = mj_loadXML("../model/ball.xml", 0, error, 1000);
   d = mj_makeData(m);
   
-  const dynamic::DynamicFunction mujocoDynamics = dynamic::GetNextPositionVelocityUsingMujoco(m, d, worldDimension, timeStepSize);
+  const dynamic::DynamicFunctionMujoco mujocoDynamics = dynamic::GetNextPositionVelocityUsingMujoco(m, d, worldDimension, timeStepSize);
 
   const int numberVariablesX = timePointDimension * numTimePoints;
 
@@ -82,7 +82,7 @@ int main(int argv, char* argc[])
   
   const unsigned kinematicViolationConstraintStartIndex = 0;
   const unsigned kinematicViolationConstraintEndIndex = kinematicViolationConstraintStartIndex + numTimePoints - 1;
-  constraints = constraint::applyKinematicViolationConstraints(constraints,
+  constraints = constraint::applyKinematicViolationConstraintsUsingMujoco(constraints,
                                                                 mujocoDynamics,
                                                                 timePointDimension,
                                                                 worldDimension,

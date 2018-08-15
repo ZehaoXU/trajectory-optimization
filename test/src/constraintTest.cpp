@@ -4,7 +4,7 @@
 #include <functional>
 #include "trajectoryOptimization/utilities.hpp"
 #include "trajectoryOptimization/dynamic.hpp"
-#include "trajectoryOptimization/constraint.hpp"
+#include "trajectoryOptimization/constraintNew.hpp"
 
 using namespace trajectoryOptimization::constraint;
 using namespace trajectoryOptimization::utilities;
@@ -119,8 +119,8 @@ class blockDynamic:public::Test{
 
 TEST_F(blockDynamic, oneTimeStepViolation){
 	const unsigned timeIndex = 0;
-	DynamicFunction blockDynamics = BlockDynamics;
-	auto getKinematicViolation = GetKinematicViolation(blockDynamics,
+	DynamicFunctionBlock blockDynamics = BlockDynamics;
+	auto getKinematicViolation = GetKinematicViolationUsingBlockDynamics(blockDynamics,
 														pointDimension,
 														positionDimension,
 														timeIndex, 
@@ -133,14 +133,14 @@ TEST_F(blockDynamic, oneTimeStepViolation){
 TEST_F(blockDynamic, twoTimeStepsViolation){
 	const unsigned timeIndexZero = 0;
 	const unsigned timeIndexOne = 1;
-	DynamicFunction blockDynamics = BlockDynamics;
-	auto getTime0KinematicViolation = GetKinematicViolation(blockDynamics,
+	DynamicFunctionBlock blockDynamics = BlockDynamics;
+	auto getTime0KinematicViolation = GetKinematicViolationUsingBlockDynamics(blockDynamics,
 															pointDimension,
 															positionDimension,
 															timeIndexZero, 
 															dt);
 
-	auto getTime1KinematicViolation = GetKinematicViolation(blockDynamics,
+	auto getTime1KinematicViolation = GetKinematicViolationUsingBlockDynamics(blockDynamics,
 															pointDimension,
 															positionDimension,
 															timeIndexOne, 
@@ -164,11 +164,11 @@ TEST_F(blockDynamic, twoTimeStepsViolationUsingApplyFunction){
 	const unsigned numTimePoints = 3;
 	const unsigned endTimeIndex = startTimeIndex + numTimePoints - 1;
 	const unsigned constraintIndex = 0;
-	DynamicFunction blockDynamics = BlockDynamics;
+	DynamicFunctionBlock blockDynamics = BlockDynamics;
 
 	std::vector<ConstraintFunction> twoStepConstraintFunctions;
 
-	twoStepConstraintFunctions = applyKinematicViolationConstraints(twoStepConstraintFunctions,
+	twoStepConstraintFunctions = applyKinematicViolationConstraintsUsingBlockDynamics(twoStepConstraintFunctions,
 																	blockDynamics,
 																	pointDimension,
 																	positionDimension,
@@ -183,7 +183,7 @@ TEST_F(blockDynamic, twoTimeStepsViolationUsingApplyFunction){
 							ElementsAre(-0.125, -0.25, -0.25, -0.5, -1, -1.75, -0.25, -1.25));
 }
 
-class mujocoDynamics:public::Test{
+class mujocoDynamic:public::Test{
 	protected:
 		const unsigned numberOfPoints = 3;    
 		const unsigned pointDimension = 6;  
@@ -208,7 +208,7 @@ class mujocoDynamics:public::Test{
 			assert (trajectory.size() == numberOfPoints*pointDimension);
 			trajectoryPtr = trajectory.data();
 
-			 mj_activate("../../mjkey.txt");    
+			mj_activate("../../mjkey.txt");    
 			char error[1000] = "ERROR: could not load binary model!";
 			_m = mj_loadXML("../../model/ball.xml", 0, error, 1000);
 			_m->opt.timestep = 0.00001;
@@ -221,6 +221,87 @@ class mujocoDynamics:public::Test{
 			mj_deactivate();
 		}
 };
+
+TEST_F(mujocoDynamic, oneTimeStepViolation){
+	const unsigned timeIndex = 0;
+	DynamicFunctionMujoco mujocoDynamics = GetNextPositionVelocityUsingMujoco(_m, _d, positionDimension, dt);
+	auto getKinematicViolation = GetKinematicViolationUsingMujoco(mujocoDynamics,
+														pointDimension,
+														positionDimension,
+														timeIndex, 
+														dt);
+	std::vector<double> kinematicViolation = getKinematicViolation(trajectoryPtr);
+	
+	EXPECT_NEAR(kinematicViolation[0], -0.125, 1e-3);
+	EXPECT_NEAR(kinematicViolation[1], -0.25, 1e-3);
+	EXPECT_NEAR(kinematicViolation[2], 0, 1e-3);
+	EXPECT_NEAR(kinematicViolation[3], 0, 1e-3);
+}
+
+TEST_F(mujocoDynamic, twoTimeStepsViolation){
+	const unsigned timeIndexZero = 0;
+	const unsigned timeIndexOne = 1;
+	DynamicFunctionMujoco mujocoDynamics = GetNextPositionVelocityUsingMujoco(_m, _d, positionDimension, dt);
+	auto getTime0KinematicViolation = GetKinematicViolationUsingMujoco(mujocoDynamics,
+															pointDimension,
+															positionDimension,
+															timeIndexZero, 
+															dt);
+
+	auto getTime1KinematicViolation = GetKinematicViolationUsingMujoco(mujocoDynamics,
+															pointDimension,
+															positionDimension,
+															timeIndexOne, 
+															dt);
+
+	std::vector<ConstraintFunction> twoStepConstraintFunctions = {getTime0KinematicViolation,
+																	getTime1KinematicViolation};
+
+	auto getStackConstriants = StackConstriants(trajectory.size(), twoStepConstraintFunctions);
+
+	auto twoStepKinematicViolations = getStackConstriants(trajectoryPtr);
+
+	EXPECT_NEAR(twoStepKinematicViolations[0], -0.125, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[1], -0.25, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[2], 0, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[3], 0, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[4], -1, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[5], -2, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[6], 0, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[7], -1, 1e-3);
+}
+
+TEST_F(mujocoDynamic, twoTimeStepsViolationUsingApplyFunction){
+	const unsigned timeIndexZero = 0;
+	const unsigned timeIndexOne = 1;
+	const unsigned startTimeIndex = timeIndexZero;
+	const unsigned numTimePoints = 3;
+	const unsigned endTimeIndex = startTimeIndex + numTimePoints - 1;
+	const unsigned constraintIndex = 0;
+	DynamicFunctionMujoco mujocoDynamics = GetNextPositionVelocityUsingMujoco(_m, _d, positionDimension, dt);
+
+	std::vector<ConstraintFunction> twoStepConstraintFunctions;
+
+	twoStepConstraintFunctions = applyKinematicViolationConstraintsUsingMujoco(twoStepConstraintFunctions,
+																	mujocoDynamics,
+																	pointDimension,
+																	positionDimension,
+																	startTimeIndex,
+																	endTimeIndex,
+																	dt);
+
+	auto getStackConstriants = StackConstriants(trajectory.size(), twoStepConstraintFunctions);
+	auto twoStepKinematicViolations = getStackConstriants(trajectoryPtr);
+
+	EXPECT_NEAR(twoStepKinematicViolations[0], -0.125, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[1], -0.25, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[2], 0, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[3], 0, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[4], -1, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[5], -2, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[6], 0, 1e-3);
+	EXPECT_NEAR(twoStepKinematicViolations[7], -1, 1e-3);
+}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
