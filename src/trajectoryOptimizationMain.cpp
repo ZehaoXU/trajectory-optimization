@@ -40,7 +40,7 @@ int main(int argv, char* argc[])
   m = mj_loadXML("../model/ball.xml", 0, error, 1000);
   d = mj_makeData(m);
   
-  const dynamic::DynamicFunctionMujoco mujocoDynamics = dynamic::GetNextPositionVelocityUsingMujoco(m, d, worldDimension, timeStepSize);
+  const dynamic::DynamicFunctionMujoco mujocoDynamics = dynamic::GetAccelerationUsingMujoco(m, d, worldDimension, timeStepSize);
 
   const int numberVariablesX = timePointDimension * numTimePoints;
 
@@ -193,4 +193,8 @@ int main(int argv, char* argc[])
   }
   
   utilities::plotTrajectory(worldDimension, positionFilename, velocityFilename, controlFilename);
+
+  mj_deleteData(d);
+  mj_deleteModel(m);
+  mj_deactivate();
 }

@@ -175,23 +175,29 @@ namespace trajectoryOptimization::constraint {
 				const auto nowControl = nowVelocity + velocityDimension;
 				const auto nextControl = nextVelocity + velocityDimension;
 
-				auto [targetNextPosition, targetNextVelocity] = dynamics(nowPosition, nowVelocity, nowControl);
-				
-				const auto getViolation = [&](const auto next, const auto target)
-						{ return next - target; };
+				const auto nowAcceleration = dynamics(nowPosition,
+														nowVelocity,
+														nowControl);
+				const auto nextAcceleration = dynamics(nextPosition,
+														nextVelocity,
+														nextControl);
+
+				const auto average = [](const auto val1, const auto val2) { return 0.5 * (val1 + val2); };
+				const auto getViolation = [&](const auto now, const auto next, const auto dNow, const auto dNext)
+						{ return (next - now) - average(dNow, dNext)*dt; };
 
 				std::vector<double> kinematicViolation(positionDimension+velocityDimension);
 
 				std::transform(positionDimensionRange.begin(), positionDimensionRange.end(),
 								kinematicViolation.begin(),
-								[nextPosition, targetNextPosition, getViolation](const auto index) {
-									return getViolation(nextPosition[index], targetNextPosition[index]);
+								[nowPosition, nextPosition, nowVelocity, nextVelocity, getViolation](const auto index) {
+									return getViolation(nowPosition[index], nextPosition[index], nowVelocity[index], nextVelocity[index]);
 								});
 
 				std::transform(positionDimensionRange.begin(), positionDimensionRange.end(),
 								kinematicViolation.begin() + positionDimension,
-								[nextVelocity, targetNextVelocity, getViolation](const auto index) {
-									return getViolation(nextVelocity[index], targetNextVelocity[index]);
+								[nowVelocity, nextVelocity, nowAcceleration, nextAcceleration, getViolation](const auto index) {
+									return getViolation(nowVelocity[index], nextVelocity[index], nowAcceleration[index], nextAcceleration[index]);
 								});
 
 				return kinematicViolation;
