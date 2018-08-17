@@ -30,7 +30,101 @@ public:
     mjData* _d;
 };
 
-TEST_F(MujocoTest, controlVelocityZero)
+TEST_F(MujocoTest, 2DControlZero)
+{
+    dvector position = {1, 2};
+    dvector velocity = {0, 0};
+    dvector control = {0, 0};
+    int worldDimension = 2;
+
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension);
+    auto acc = getAcceleration(position.data(), velocity.data(), control.data());
+    dvector acceleration(acc, acc + worldDimension);
+
+    EXPECT_THAT(acceleration, ElementsAre(0, 0));
+}
+
+TEST_F(MujocoTest, 2DControlOne)
+{
+    dvector position = {1, 2};
+    dvector velocity = {0, 0};
+    dvector control = {1, 0};
+    int worldDimension = 2;
+
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension);
+    auto acc = getAcceleration(position.data(), velocity.data(), control.data());
+    dvector acceleration(acc, acc + worldDimension);
+
+    EXPECT_THAT(acceleration, ElementsAre(1, 0));
+}
+
+TEST_F(MujocoTest, 2DControlOneTwo)
+{
+    dvector position = {1, 2};
+    dvector velocity = {0, 0};
+    dvector control = {1, 2};
+    int worldDimension = 2;
+
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension);
+    auto acc = getAcceleration(position.data(), velocity.data(), control.data());
+    dvector acceleration(acc, acc + worldDimension);
+
+    EXPECT_THAT(acceleration, ElementsAre(1, 2));
+}
+
+TEST_F(MujocoTest, controlZero)
+{
+    dvector position = {1, 2, 0};
+    dvector velocity = {0, 0, 0};
+    dvector control = {0, 0, 0};
+
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+    auto acc = getAcceleration(position.data(), velocity.data(), control.data());
+    dvector acceleration(acc, acc + 3);
+
+    EXPECT_THAT(acceleration, ElementsAre(0, 0, 0));
+}
+
+TEST_F(MujocoTest, controlOne)
+{
+    dvector position = {1, 2, 0};
+    dvector velocity = {0, 0, 0};
+    dvector control = {1, 0, 0};
+
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+    auto acc = getAcceleration(position.data(), velocity.data(), control.data());
+    dvector acceleration(acc, acc + 3);
+
+    EXPECT_THAT(acceleration, ElementsAre(1, 0, 0));
+}
+
+TEST_F(MujocoTest, controlOneTwo)
+{
+    dvector position = {1, 2, 0};
+    dvector velocity = {0, 0, 0};
+    dvector control = {1, 2, 0};
+
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+    auto acc = getAcceleration(position.data(), velocity.data(), control.data());
+    dvector acceleration(acc, acc + 3);
+
+    EXPECT_THAT(acceleration, ElementsAre(1, 2, 0));
+}
+
+// TEST_F(MujocoTest, controlOneTwoThree)
+// {
+//     dvector position = {1, 2, 0};
+//     dvector velocity = {0, 0, 0};
+//     dvector control = {1, 4, 5};
+
+//     auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+//     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
+//     dvector acceleration(acc, acc + 3);
+
+//     EXPECT_THAT(acceleration, ElementsAre(1, 2, 3));
+// }
+
+TEST_F(MujocoTest, getPositionControlVelocityZero)
 {
     dvector position = {1, 2, 0};
     dvector velocity = {0, 0, 0};
@@ -45,7 +139,7 @@ TEST_F(MujocoTest, controlVelocityZero)
     EXPECT_THAT(velocity, nextVelocity);
 }
 
-TEST_F(MujocoTest, controlZero) 
+TEST_F(MujocoTest, getPositionVelocityControlZero) 
 {
     dvector position = {1, 2, 0};
     dvector velocity = {2, 2, 0};
@@ -62,7 +156,7 @@ TEST_F(MujocoTest, controlZero)
     EXPECT_THAT(nextVelocity, ElementsAre(2, 2, 0));
 }
 
-TEST_F(MujocoTest, controlOne) 
+TEST_F(MujocoTest, getPositionVelocityControlOne) 
 {
     dvector position = {1, 2, 0};
     dvector velocity = {2, 2, 0};
@@ -81,7 +175,7 @@ TEST_F(MujocoTest, controlOne)
     EXPECT_NEAR(nextVelocity[2], 0, 1e-5);
 }
 
-TEST_F(MujocoTest, controlOneTwo) 
+TEST_F(MujocoTest, getPositionVelocityControlOneTwo) 
 {
     dvector position = {1, 2, 0};
     dvector velocity = {2, 2, 0};

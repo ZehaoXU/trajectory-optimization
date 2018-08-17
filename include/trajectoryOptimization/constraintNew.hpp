@@ -175,13 +175,12 @@ namespace trajectoryOptimization::constraint {
 				const auto nowControl = nowVelocity + velocityDimension;
 				const auto nextControl = nextVelocity + velocityDimension;
 
-				const auto nowAcceleration = dynamics(nowPosition,
-														nowVelocity,
-														nowControl);
-				const auto nextAcceleration = dynamics(nextPosition,
-														nextVelocity,
-														nextControl);
+				const auto nowAcc = dynamics(nowPosition, nowVelocity, nowControl);
+				dvector nowAcceleration(nowAcc, nowAcc + velocityDimension);
 
+				const auto nextAcc = dynamics(nextPosition, nextVelocity, nextControl);
+				dvector nextAcceleration(nextAcc, nextAcc + velocityDimension);
+				
 				const auto average = [](const auto val1, const auto val2) { return 0.5 * (val1 + val2); };
 				const auto getViolation = [&](const auto now, const auto next, const auto dNow, const auto dNext)
 						{ return (next - now) - average(dNow, dNext)*dt; };

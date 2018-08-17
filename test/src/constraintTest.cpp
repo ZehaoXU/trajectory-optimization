@@ -2,12 +2,10 @@
 #include <gmock/gmock.h>
 #include <range/v3/view.hpp>
 #include <functional>
-#include "trajectoryOptimization/utilities.hpp"
 #include "trajectoryOptimization/dynamic.hpp"
 #include "trajectoryOptimization/constraintNew.hpp"
 
 using namespace trajectoryOptimization::constraint;
-using namespace trajectoryOptimization::utilities;
 using namespace trajectoryOptimization::dynamic; 
 using namespace testing;
 using namespace ranges;
@@ -224,7 +222,7 @@ class mujocoDynamic:public::Test{
 
 TEST_F(mujocoDynamic, oneTimeStepViolation){
 	const unsigned timeIndex = 0;
-	DynamicFunctionMujoco mujocoDynamics = GetNextPositionVelocityUsingMujoco(_m, _d, positionDimension, dt);
+	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension, dt);
 	auto getKinematicViolation = GetKinematicViolationUsingMujoco(mujocoDynamics,
 														pointDimension,
 														positionDimension,
@@ -232,16 +230,14 @@ TEST_F(mujocoDynamic, oneTimeStepViolation){
 														dt);
 	std::vector<double> kinematicViolation = getKinematicViolation(trajectoryPtr);
 	
-	EXPECT_NEAR(kinematicViolation[0], -0.125, 1e-3);
-	EXPECT_NEAR(kinematicViolation[1], -0.25, 1e-3);
-	EXPECT_NEAR(kinematicViolation[2], 0, 1e-3);
-	EXPECT_NEAR(kinematicViolation[3], 0, 1e-3);
+	EXPECT_THAT(kinematicViolation,
+							ElementsAre(-0.125, -0.25, -0.25, -0.5));
 }
 
 TEST_F(mujocoDynamic, twoTimeStepsViolation){
 	const unsigned timeIndexZero = 0;
 	const unsigned timeIndexOne = 1;
-	DynamicFunctionMujoco mujocoDynamics = GetNextPositionVelocityUsingMujoco(_m, _d, positionDimension, dt);
+	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension, dt);
 	auto getTime0KinematicViolation = GetKinematicViolationUsingMujoco(mujocoDynamics,
 															pointDimension,
 															positionDimension,
@@ -261,14 +257,8 @@ TEST_F(mujocoDynamic, twoTimeStepsViolation){
 
 	auto twoStepKinematicViolations = getStackConstriants(trajectoryPtr);
 
-	EXPECT_NEAR(twoStepKinematicViolations[0], -0.125, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[1], -0.25, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[2], 0, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[3], 0, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[4], -1, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[5], -2, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[6], 0, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[7], -1, 1e-3);
+	EXPECT_THAT(twoStepKinematicViolations,
+							ElementsAre(-0.125, -0.25, -0.25, -0.5, -1, -1.75, -0.25, -1.25));
 }
 
 TEST_F(mujocoDynamic, twoTimeStepsViolationUsingApplyFunction){
@@ -278,7 +268,7 @@ TEST_F(mujocoDynamic, twoTimeStepsViolationUsingApplyFunction){
 	const unsigned numTimePoints = 3;
 	const unsigned endTimeIndex = startTimeIndex + numTimePoints - 1;
 	const unsigned constraintIndex = 0;
-	DynamicFunctionMujoco mujocoDynamics = GetNextPositionVelocityUsingMujoco(_m, _d, positionDimension, dt);
+	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension, dt);
 
 	std::vector<ConstraintFunction> twoStepConstraintFunctions;
 
@@ -293,14 +283,8 @@ TEST_F(mujocoDynamic, twoTimeStepsViolationUsingApplyFunction){
 	auto getStackConstriants = StackConstriants(trajectory.size(), twoStepConstraintFunctions);
 	auto twoStepKinematicViolations = getStackConstriants(trajectoryPtr);
 
-	EXPECT_NEAR(twoStepKinematicViolations[0], -0.125, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[1], -0.25, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[2], 0, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[3], 0, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[4], -1, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[5], -2, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[6], 0, 1e-3);
-	EXPECT_NEAR(twoStepKinematicViolations[7], -1, 1e-3);
+	EXPECT_THAT(twoStepKinematicViolations,
+							ElementsAre(-0.125, -0.25, -0.25, -0.5, -1, -1.75, -0.25, -1.25));
 }
 
 int main(int argc, char **argv) {
