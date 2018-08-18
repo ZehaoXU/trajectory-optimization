@@ -65,7 +65,7 @@ namespace trajectoryOptimization::dynamic {
 
 		const double* operator() (const double* position, const double* velocity, const double* control)
 		{
-			mj_resetData(m, d);
+			// mj_resetData(m, d);
 			
 			mju_copy(d->qpos, position, worldDimension);
 			mju_copy(d->qvel, velocity, worldDimension);

@@ -12,5 +12,6 @@
     <actuator>
         <motor gear="1" joint="slide0"/>
         <motor gear="1" joint="slide1"/>
+        <motor gear="1" joint="slide2"/>
     </actuator>
 </mujoco>
