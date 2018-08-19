@@ -1,14 +1,14 @@
-//---------------------------------//
-//  This file is part of MuJoCo    //
-//  Written by Emo Todorov         //
-//  Copyright (C) 2017 Roboti LLC  //
-//---------------------------------//
-
-
 #include "mujoco.h"
 #include "glfw3.h"
-#include "stdio.h"
-#include "string.h"
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <cstdlib>
+#include <vector>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
  
 
 //-------------------------------- global variables -------------------------------------
@@ -19,7 +19,7 @@ mjData* d = 0;
 char lastfile[1000] = "";
 
 // user state
-bool paused = false;
+bool paused = true;
 bool showoption = false;
 bool showinfo = true;
 bool showfullscreen = false;
@@ -128,6 +128,62 @@ const char help_content[] =
 char opt_title[1000] = "";
 char opt_content[1000];
 
+int pointDimension;
+int positionDimension;
+int numberOfPoints;
+double timeStep;
+ifstream dataFile;
+vector<double> trajectory;
+
+int timeIndex = 0;
+
+// initialize trajectroy
+void initializeTrajectory(string dir)
+{
+    dataFile.open(dir.c_str());
+    string line;
+    string label;
+    int count = 0;
+
+    while (!dataFile.eof())
+    {
+        getline(dataFile, line);
+
+        stringstream ss(line);
+        ss >> label;
+
+        if (label.compare("timeStep:") == 0)
+        {
+            double val;
+            ss >> val;
+            timeStep = val;
+            continue;
+        }
+        if (label.compare("pointDimension:") == 0)
+        {
+            int val;
+            ss >> val;
+            pointDimension = val;
+            positionDimension = pointDimension / 3;
+            continue;
+        }
+        if (label.compare("numberOfPoints:") == 0)
+        {
+            int val;
+            ss >> val;
+            numberOfPoints = val;
+            continue;
+        }
+        if (label.compare(to_string(count)) == 0)
+        {
+            count ++;
+            double val;
+            ss >> val;
+            trajectory.push_back(val);
+            continue;
+        }
+    }
+}
 
 //-------------------------------- profiler and sensor ----------------------------------
 
@@ -957,6 +1013,15 @@ void makeoptionstring(const char* name, char key, char* buf)
     buf[cnt+4] = 0;
 }
 
+// change position
+void setPosition(int index)
+{
+    for (int i = 0; i < positionDimension; i++)
+        d->qpos[i] = trajectory[index * pointDimension + i];
+    mju_zero(d->qvel, positionDimension);
+    mju_zero(d->ctrl, positionDimension);
+    mju_zero(d->qfrc_applied, m->nv);
+}
 
 // advance simulation
 void simulation(void)
@@ -964,9 +1029,6 @@ void simulation(void)
     // no model
     if( !m )
         return;
-
-    // clear timers
-    cleartimers(d);
 
     // paused
     if( paused )
@@ -982,28 +1044,15 @@ void simulation(void)
     // running
     else
     {
-        // slow motion factor: 10x
-        mjtNum factor = (slowmotion ? 10 : 1);
-
-        // advance effective simulation time by 1/refreshrate
-        mjtNum startsimtm = d->time;
-        while( (d->time-startsimtm)*factor<1.0/refreshrate )
+        if (timeIndex < numberOfPoints - 1)
         {
-            // clear old perturbations, apply new
-            mju_zero(d->xfrc_applied, 6*m->nbody);
-            if( pert.select>0 )
-            {
-                mjv_applyPerturbPose(m, d, &pert, 0);  // move mocap bodies only
-                mjv_applyPerturbForce(m, d, &pert);
-            }
-
-            // run mj_step and count
-            mj_step(m, d);
-
-            // break on reset
-            if( d->time<startsimtm )
-                break;
+            int oldIndex = timeIndex;
+            timeIndex = int(d->time * (1/timeStep));
+            if (oldIndex != timeIndex)
+                setPosition(timeIndex);
         }
+        cout << d->time << endl;
+        mj_step(m,d);
     }
 }
 
@@ -1267,6 +1316,10 @@ int main(int argc, const char** argv)
     // load model if filename given as argument
     if( argc==2 )
         loadmodel(window, argv[1]);
+
+    string data_dir = "../log/data1.txt";
+    initializeTrajectory(data_dir);
+    cout << timeStep << "  " << pointDimension << "  " << numberOfPoints << "  " << trajectory.size() << endl;
 
     // main loop
     while( !glfwWindowShouldClose(window) )

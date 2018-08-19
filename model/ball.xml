@@ -1,12 +1,13 @@
 <mujoco>
-    <option gravity="0 0 0" timestep="0.001"/>
+    <option gravity="0 0 0" timestep="0.15"/>
     <worldbody>
-        <light diffuse=".5 .5 .5" pos="0 0 3" dir="0 0 -1"/>    
-        <body name="ball" pos="0 0 0.2">
+        <light diffuse="1 1 1" pos="0 0 3" dir="0 0 -1" mode="trackcom" target="ball" />
+        <geom name='floor' pos='0 0 0' size='5 5 .125' type='plane' condim='3'/>    
+        <body name="ball" pos="0 0 0.4">
             <joint axis="1 0 0" damping="0" name="slide0" pos="0 0 0" type="slide"/>
             <joint axis="0 1 0" damping="0" name="slide1" pos="0 0 0" type="slide"/>
             <joint axis="0 0 1" damping="0" name="slide2" pos="0 0 0" type="slide"/>
-            <geom type="sphere" size="0.2" mass="1" rgba="0 .9 0 1"/>
+            <geom type="sphere" size="0.4" mass="1" rgba="0 .9 0 1"/>
         </body>
     </worldbody>
     <actuator>
