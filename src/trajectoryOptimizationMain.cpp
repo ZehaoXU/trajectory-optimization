@@ -29,8 +29,8 @@ int main(int argv, char* argc[])
   const int kinematicDimension = worldDimension * 2;
   const int controlDimension = worldDimension;
   const int timePointDimension = kinematicDimension + controlDimension;
-  const int numTimePoints = 50;
-  const double timeStepSize = 1;
+  const int numTimePoints = 250;
+  const double timeStepSize = 0.1;
   
   mjModel* m = NULL;
   mjData* d = NULL;
@@ -47,7 +47,7 @@ int main(int argv, char* argc[])
   const int startTimeIndex = 0;
   const numberVector startPoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   const int goalTimeIndex = numTimePoints - 1;
-  const numberVector goalPoint = {50, 40, 30, 0, 0, 0, 0, 0, 0};
+  const numberVector goalPoint = {5, 4, 0, 0, 0, 0, 0, 0, 0};
 
   const numberVector xLowerBounds(numberVariablesX, -100);
   const numberVector xUpperBounds(numberVariablesX, 100);
@@ -72,8 +72,8 @@ int main(int argv, char* argc[])
                                                               startTimeIndex,
                                                               startPoint));
   
-  const unsigned randomTargetTimeIndex = 25;
-  const std::vector<double> randomTarget = {-10, 20, 30, 0, 0, 0, 0, 0, 0};
+  const unsigned randomTargetTimeIndex = 125;
+  const std::vector<double> randomTarget = {-2, 2, 0, 0, 0, 0, 0, 0, 0};
   constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
                                                               timePointDimension,
                                                               kinematicDimension,
@@ -135,6 +135,9 @@ int main(int argv, char* argc[])
     printf("\n\nSolution of the primal variables, x\n");
     for (Index i=0; i<n; i++) {
       printf("x[%d] = %e\n", i, x[i]); 
+    }
+    for (Index i=0; i<n; i++) {
+      printf("%d %e\n", i, x[i]); 
     }
 
     utilities::outputPositionVelocityControlToFiles(x,

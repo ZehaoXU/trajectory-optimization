@@ -1,5 +1,6 @@
 #include "mujoco.h"
 #include "glfw3.h"
+#include <GL/glut.h>
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
@@ -136,6 +137,7 @@ ifstream dataFile;
 vector<double> trajectory;
 
 int timeIndex = 0;
+vector<mjvGeom> geoms;
 
 // initialize trajectroy
 void initializeTrajectory(string dir)
@@ -1023,6 +1025,20 @@ void setPosition(int index)
     mju_zero(d->qfrc_applied, m->nv);
 }
 
+void drawPoint()
+{
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 0.0, 0.0);
+    glPointSize(40.0f);
+
+    glBegin(GL_POINTS);
+    glVertex3d(trajectory[timeIndex * pointDimension], trajectory[timeIndex * pointDimension + 1], trajectory[timeIndex * pointDimension + 2]);
+    glEnd();
+
+    glFlush();
+}
+
 // advance simulation
 void simulation(void)
 {
@@ -1051,11 +1067,61 @@ void simulation(void)
             if (oldIndex != timeIndex)
                 setPosition(timeIndex);
         }
-        cout << d->time << endl;
         mj_step(m,d);
     }
 }
 
+void initializeGeom(mjvGeom* geom)
+{
+    geom->type = mjGEOM_BOX;
+
+    geom->dataid = -1;
+    geom->objtype = mjOBJ_UNKNOWN;
+    geom->objid = -1;
+    geom->category = mjCAT_DECOR;
+    geom->texid = -1;
+    geom->texuniform = 0;
+    geom->texrepeat[0] = 1;
+    geom->texrepeat[1] = 1;
+    geom->emission = 0;
+    geom->specular = 0;
+    geom->shininess = 0;
+    geom->reflectance = 0;
+    
+    geom->size[0] = 0;
+    geom->size[1] = 0;
+    geom->size[2] = 0;
+    geom->rgba[0] = 1.0;
+    geom->rgba[1] = geom->rgba[2] = 0;
+    geom->rgba[3] = 1;
+    geom->pos[0] = float(trajectory[timeIndex * pointDimension]);
+    geom->pos[1] = float(trajectory[timeIndex * pointDimension + 1]);
+    geom->pos[2] = 0;
+    geom->mat[0] = 1;
+    geom->mat[1] = 1;
+    geom->mat[2] = 1;
+    memset(geom->label, 0, 100);
+    geom->label[0] = '.';
+}
+
+void addNewGeomToVector()
+{
+    mjvGeom* g = new mjvGeom;
+    initializeGeom(g);
+    geoms.push_back(*g);
+    delete g;
+}
+
+void addGeomsToScene()
+{
+    addNewGeomToVector();
+    for (int i = 0; i < geoms.size(); i++)
+    {
+        mjvGeom* g = scn.geoms + scn.ngeom;
+        *g = geoms[i];
+        scn.ngeom ++;
+    }
+}
 
 // render
 void render(GLFWwindow* window)
@@ -1141,9 +1207,13 @@ void render(GLFWwindow* window)
     // update scene
     mjv_updateScene(m, d, &vopt, &pert, &cam, mjCAT_ALL, &scn);
 
+    addGeomsToScene();
+    cout << scn.ngeom << endl;
+
+    mjr_setBuffer(mjFB_WINDOW, &con);
     // render
     mjr_render(rect, &scn, &con);
-
+    
     // show depth map
     if( showdepth )
     {
@@ -1317,9 +1387,10 @@ int main(int argc, const char** argv)
     if( argc==2 )
         loadmodel(window, argv[1]);
 
-    string data_dir = "../log/data1.txt";
+    string data_dir = "../log/data2.txt";
     initializeTrajectory(data_dir);
     cout << timeStep << "  " << pointDimension << "  " << numberOfPoints << "  " << trajectory.size() << endl;
+    cout << scn.maxgeom << endl;
 
     // main loop
     while( !glfwWindowShouldClose(window) )
