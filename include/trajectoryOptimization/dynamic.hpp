@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <stdio.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -50,12 +51,12 @@ namespace trajectoryOptimization::dynamic {
 
 	class GetAccelerationUsingMujoco
 	{
-	private:
+	  private:
 		const double dt;
 		const int worldDimension;
 		mjModel* m;
 		mjData* d;
-	public:
+	  public:
 		GetAccelerationUsingMujoco(const mjModel* _m, mjData* _d, const int dimension = 3, const double dTime = 0.5):
 			worldDimension(dimension), dt(dTime)
 		{
@@ -76,14 +77,44 @@ namespace trajectoryOptimization::dynamic {
 		}		
 	};
 
+	class GetContactForceUsingMujoco
+	{
+	  private:
+		const double dt;
+		const int worldDimension;
+		mjModel* m;
+		mjData* d;
+		double contactForce[6];
+	  public:
+		GetContactForceUsingMujoco(const mjModel* _m, mjData* _d, const int dimension = 3, const double dTime = 0.5):
+			worldDimension(dimension), dt(dTime)
+		{
+			m = mj_copyModel(NULL, _m);
+			d = mj_copyData(NULL, _m, _d);
+			memset(contactForce, 0, 6);
+		}
+
+		const double* operator() (const double* position, const double* velocity, const double* control)
+		{
+			// mj_resetData(m, d);
+			
+			mju_copy(d->qpos, position, worldDimension);
+			mju_copy(d->qvel, velocity, worldDimension);
+			mju_copy(d->ctrl, control, worldDimension);
+			mj_forward(m, d);
+			mj_contactForce(m, d, 0, contactForce);
+
+			return contactForce;
+		}		
+	};
 
 	class GetNextPositionVelocityUsingMujoco{
-	private:
+	  private:
 		mjModel* m;
 		mjData* d;
 		const int worldDimension;
 		const double dt;
-	public:
+	  public:
 		GetNextPositionVelocityUsingMujoco(const mjModel* model, mjData* data, 
 										const int dimension = 3, 
 										const double dTime = 0.5):

@@ -29,8 +29,8 @@ int main(int argv, char* argc[])
   const int kinematicDimension = worldDimension * 2;
   const int controlDimension = worldDimension;
   const int timePointDimension = kinematicDimension + controlDimension;
-  const int numTimePoints = 250;
-  const double timeStepSize = 0.1;
+  const int numTimePoints = 150;
+  const double timeStepSize = 0.5;
   
   mjModel* m = NULL;
   mjData* d = NULL;
@@ -41,13 +41,14 @@ int main(int argv, char* argc[])
   d = mj_makeData(m);
   
   const dynamic::DynamicFunctionMujoco mujocoDynamics = dynamic::GetAccelerationUsingMujoco(m, d, worldDimension, timeStepSize);
+  const dynamic::DynamicFunctionMujoco contactForce = dynamic::GetContactForceUsingMujoco(m, d, worldDimension, timeStepSize);
 
   const int numberVariablesX = timePointDimension * numTimePoints;
 
   const int startTimeIndex = 0;
   const numberVector startPoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   const int goalTimeIndex = numTimePoints - 1;
-  const numberVector goalPoint = {5, 4, 0, 0, 0, 0, 0, 0, 0};
+  const numberVector goalPoint = {5, 5, 0, 0, 0, 0, 0, 0, 0};
 
   const numberVector xLowerBounds(numberVariablesX, -100);
   const numberVector xUpperBounds(numberVariablesX, 100);
@@ -73,7 +74,7 @@ int main(int argv, char* argc[])
                                                               startPoint));
   
   const unsigned randomTargetTimeIndex = 125;
-  const std::vector<double> randomTarget = {-2, 2, 0, 0, 0, 0, 0, 0, 0};
+  const std::vector<double> randomTarget = {4, 4, 0, 0, 0, 0, 0, 0, 0};
   constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
                                                               timePointDimension,
                                                               kinematicDimension,
@@ -89,7 +90,14 @@ int main(int argv, char* argc[])
                                                                 kinematicViolationConstraintStartIndex,
                                                                 kinematicViolationConstraintEndIndex,
                                                                 timeStepSize);
-                  
+  constraints = constraint::applyContactForceSquare(constraints,
+                                                    contactForce,
+                                                    timePointDimension,
+                                                    worldDimension,
+                                                    kinematicViolationConstraintStartIndex,
+                                                    kinematicViolationConstraintEndIndex,
+                                                    timeStepSize);
+
   constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
                                                                 timePointDimension,
                                                                 kinematicDimension,

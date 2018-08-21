@@ -111,18 +111,18 @@ TEST_F(MujocoTest, controlOneTwo)
     EXPECT_THAT(acceleration, ElementsAre(1, 2, 0));
 }
 
-// TEST_F(MujocoTest, controlOneTwoThree)
-// {
-//     dvector position = {1, 2, 0};
-//     dvector velocity = {0, 0, 0};
-//     dvector control = {1, 4, 5};
+TEST_F(MujocoTest, controlOneTwoThree)
+{
+    dvector position = {1, 2, 0};
+    dvector velocity = {0, 0, 0};
+    dvector control = {1, 2, 3};
 
-//     auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
-//     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
-//     dvector acceleration(acc, acc + 3);
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+    auto acc = getAcceleration(position.data(), velocity.data(), control.data());
+    dvector acceleration(acc, acc + 3);
 
-//     EXPECT_THAT(acceleration, ElementsAre(1, 2, 3));
-// }
+    EXPECT_THAT(acceleration, ElementsAre(1, 2, 3));
+}
 
 TEST_F(MujocoTest, getPositionControlVelocityZero)
 {
@@ -192,6 +192,18 @@ TEST_F(MujocoTest, getPositionVelocityControlOneTwo)
     EXPECT_NEAR(nextVelocity[0], 2.5, 1e-5);
     EXPECT_NEAR(nextVelocity[1], 3, 1e-5);
     EXPECT_NEAR(nextVelocity[2], 0, 1e-5);
+}
+
+TEST_F(MujocoTest, getContactForceNotTouch)
+{
+    dvector position = {1, 1, 0};
+    dvector velocity = {2, 2, 0};
+    dvector control = {1, 2, 0};
+    
+    auto getContactForce = GetContactForceUsingMujoco(_m, _d);
+    auto frc = getContactForce(position.data(), velocity.data(), control.data());
+    dvector force(frc, frc + 6);
+    EXPECT_THAT(force, ElementsAre(0, 0, 0, 0, 0, 0));
 }
 
 int main(int argc, char** argv)

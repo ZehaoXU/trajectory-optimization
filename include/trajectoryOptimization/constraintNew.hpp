@@ -203,6 +203,65 @@ namespace trajectoryOptimization::constraint {
 			};
 	};
 
+	class GetContactForceSquare
+	{
+	  private:
+		const DynamicFunctionMujoco getContactForce;
+		const unsigned pointDimension;
+		const unsigned positionDimension;
+		const unsigned timeIndex;
+		const double dt;
+		const unsigned velocityDimension;
+		const unsigned controlDimension;
+		const int currentKinematicsStartIndex;
+		const int nextKinematicsStartIndex;
+		const unsigned contactForceDimension;
+		std::vector<unsigned> forceDimensionRange;
+
+		public:
+			GetContactForceSquare(const DynamicFunctionMujoco getContactForce,
+									const unsigned pointDimension,
+									const unsigned positionDimension,
+									const unsigned timeIndex,
+									const double dt):
+										getContactForce(getContactForce),
+										pointDimension(pointDimension),
+										positionDimension(positionDimension),
+										timeIndex(timeIndex),
+										dt(dt),
+										velocityDimension(positionDimension),
+										controlDimension(pointDimension - positionDimension - velocityDimension),
+										currentKinematicsStartIndex(timeIndex * pointDimension),
+										nextKinematicsStartIndex((timeIndex+1) * pointDimension),
+										contactForceDimension(1),
+										forceDimensionRange(ranges::view::ints((unsigned) 0, contactForceDimension)) {
+											assert(positionDimension == velocityDimension);
+										}
+			std::vector<double> operator() (const double* trajectoryPointer)
+			{
+				const auto nowPosition = trajectoryPointer + currentKinematicsStartIndex;
+
+				const auto nowVelocity = nowPosition + positionDimension;
+
+				const auto nowControl = nowVelocity + velocityDimension;
+
+				const auto force = getContactForce(nowPosition, nowVelocity, nowControl);
+				dvector contactForce(force, force + contactForceDimension);
+				
+				const auto getSquare = [&](const auto val) { return std::pow(val, 2); };
+			
+				std::vector<double> forceSquare(contactForceDimension);
+
+				std::transform(forceDimensionRange.begin(), forceDimensionRange.end(),
+								forceSquare.begin(),
+								[contactForce](const auto index) {
+									return std::pow(contactForce[index], 2);
+								});
+
+				return forceSquare;
+			}
+	};
+
 	class StackConstriants {
 		const std::vector<ConstraintFunction>& constraintFunctions;
 		unsigned numConstraints;
@@ -264,9 +323,26 @@ namespace trajectoryOptimization::constraint {
 																			timeStepSize));
 			}
 
-			return constraints;
-		}
+		return constraints;
 	}
+	std::vector<ConstraintFunction> applyContactForceSquare(std::vector<ConstraintFunction> constraints,
+																		const DynamicFunctionMujoco getContactForce,
+																		const unsigned timePointDimension,
+																		const unsigned worldDimension,
+																		const unsigned timeIndexStart,
+																		const unsigned timeIndexEndInclusive,
+																		const double timeStepSize) {
+			for (int timeIndex = timeIndexStart; timeIndex <= timeIndexEndInclusive; timeIndex++) {
+				constraints.push_back(constraint::GetContactForceSquare(getContactForce,
+																			timePointDimension,
+																			worldDimension,
+																			timeIndex,
+																			timeStepSize));
+			}
+
+		return constraints;
+	}
+}
 
 // block dynamics
 // violation calculate

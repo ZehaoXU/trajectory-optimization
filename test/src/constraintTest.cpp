@@ -287,6 +287,77 @@ TEST_F(mujocoDynamic, twoTimeStepsViolationUsingApplyFunction){
 							ElementsAre(-0.125, -0.25, -0.25, -0.5, -1, -1.75, -0.25, -1.25));
 }
 
+class contactForce:public::Test{
+	protected:
+		const unsigned numberOfPoints = 2;    
+		const unsigned pointDimension = 6;  
+		const unsigned kinematicDimension = 4;
+		unsigned positionDimension;
+		unsigned velocityDimension;
+		const double dt = 0.5;
+		std::vector<double> trajectory;
+		const double* trajectoryPtr;
+
+		mjModel* _m;
+		mjData* _d;
+	
+		virtual void SetUp() override
+		{
+			std::vector<double> point1 = {0, 0, 3, 4, 1, 2};	// not collide
+			std::vector<double> point2 = {2, 1.6, 3.5, 5, 2, 4};	// collide
+			positionDimension = kinematicDimension/2;
+			velocityDimension = positionDimension;
+			trajectory = yield_from(view::concat(point1, point2));
+			assert (trajectory.size() == numberOfPoints*pointDimension);
+			trajectoryPtr = trajectory.data();
+
+			mj_activate("../../mjkey.txt");    
+			char error[1000] = "ERROR: could not load binary model!";
+			_m = mj_loadXML("../../model/ball.xml", 0, error, 1000);
+			_m->opt.timestep = 0.00001;
+			_d = mj_makeData(_m);
+		}
+		void TearDown() override
+		{
+			mj_deleteData(_d);
+			mj_deleteModel(_m);
+			mj_deactivate();
+		}
+};
+
+TEST_F(contactForce, firstTimeStepContactForceSquare){
+	const unsigned timeIndex = 0;
+	DynamicFunctionMujoco mujocoDynamics = GetContactForceUsingMujoco(_m, _d, positionDimension, dt);
+	auto getContactForceSquare = GetContactForceSquare(mujocoDynamics,
+														pointDimension,
+														positionDimension,
+														timeIndex, 
+														dt);
+	std::vector<double> forceSquare = getContactForceSquare(trajectoryPtr);
+	
+	EXPECT_THAT(forceSquare, ElementsAre(0, 0, 0));
+}
+
+TEST_F(contactForce, twoTimeStepContactForceSquareUsingApplyFunction){
+	const unsigned startTimeIndex = 0;
+	const unsigned endTimeIndex = 1;
+	DynamicFunctionMujoco mujocoDynamics = GetContactForceUsingMujoco(_m, _d, positionDimension, dt);
+	std::vector<ConstraintFunction> twoStepConstraintFunctions;
+
+	twoStepConstraintFunctions = applyContactForceSquare(twoStepConstraintFunctions,
+														mujocoDynamics,
+														pointDimension,
+														positionDimension,
+														startTimeIndex,
+														endTimeIndex,
+														dt);
+
+	auto getStackConstriants = StackConstriants(trajectory.size(), twoStepConstraintFunctions);
+	auto forcetwoStepForceSquareSquare = getStackConstriants(trajectoryPtr);
+	
+	EXPECT_THAT(forcetwoStepForceSquareSquare, ElementsAre(0, 0, 0));
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
