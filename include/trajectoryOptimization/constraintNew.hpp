@@ -246,7 +246,7 @@ namespace trajectoryOptimization::constraint {
 				const auto nowControl = nowVelocity + velocityDimension;
 
 				const auto force = getContactForce(nowPosition, nowVelocity, nowControl);
-				dvector contactForce(force, force + contactForceDimension);
+				std::vector<mjtNum> contactForce(force, force + contactForceDimension);
 				
 				const auto getSquare = [&](const auto val) { return std::pow(val, 2); };
 			
@@ -255,7 +255,7 @@ namespace trajectoryOptimization::constraint {
 				std::transform(forceDimensionRange.begin(), forceDimensionRange.end(),
 								forceSquare.begin(),
 								[contactForce](const auto index) {
-									return log10(std::abs(contactForce[index]) + 1) / 10;
+									return std::log2(std::abs(contactForce[index] + 1));
 								});
 
 				return forceSquare;

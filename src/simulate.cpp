@@ -1096,7 +1096,7 @@ void initializeGeom(mjvGeom* geom)
     geom->rgba[3] = 1;
     geom->pos[0] = float(trajectory[timeIndex * pointDimension]);
     geom->pos[1] = float(trajectory[timeIndex * pointDimension + 1]);
-    geom->pos[2] = 0;
+    geom->pos[2] = float(trajectory[timeIndex * pointDimension + 2]);
     geom->mat[0] = 1;
     geom->mat[1] = 1;
     geom->mat[2] = 1;

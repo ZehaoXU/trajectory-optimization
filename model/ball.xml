@@ -7,7 +7,7 @@
             <joint axis="1 0 0" damping="0" name="slide0" pos="0 0 0" type="slide"/>
             <joint axis="0 1 0" damping="0" name="slide1" pos="0 0 0" type="slide"/>
             <joint axis="0 0 1" damping="0" name="slide2" pos="0 0 0" type="slide"/>
-            <geom type="sphere" size="0.2" mass="10" rgba="0 .9 0 1"/>
+            <geom type="sphere" size="0.2" mass="100" rgba="0 .9 0 1"/>
         </body>
 		<!-- <body mocap="true" name="mocap1" pos="4 4 0">
             <light name="light1" pos="0 0 2" mode="fixed" castshadow="false"/>

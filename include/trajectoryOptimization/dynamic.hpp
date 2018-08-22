@@ -85,14 +85,14 @@ namespace trajectoryOptimization::dynamic {
 		const int worldDimension;
 		mjModel* m;
 		mjData* d;
-		double contactForce[6];
+		// double contactForce[6];
 	  public:
 		GetContactForceUsingMujoco(const mjModel* _m, mjData* _d, const int dimension = 3, const double dTime = 0.5):
 			worldDimension(dimension), dt(dTime)
 		{
 			m = mj_copyModel(NULL, _m);
 			d = mj_copyData(NULL, _m, _d);
-			memset(contactForce, 0, 6);
+			// memset(contactForce, 0, 6);
 		}
 
 		const double* operator() (const double* position, const double* velocity, const double* control)
@@ -103,9 +103,9 @@ namespace trajectoryOptimization::dynamic {
 			mju_copy(d->qvel, velocity, worldDimension);
 			mju_copy(d->ctrl, control, worldDimension);
 			mj_forward(m, d);
-			mj_contactForce(m, d, 1, contactForce);
+			// mj_contactForce(m, d, 1, contactForce);
 
-			return contactForce;
+			return d->contact->pos;
 		}		
 	};
 

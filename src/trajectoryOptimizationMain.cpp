@@ -29,7 +29,7 @@ int main(int argv, char* argc[])
   const int kinematicDimension = worldDimension * 2;
   const int controlDimension = worldDimension;
   const int timePointDimension = kinematicDimension + controlDimension;
-  const int numTimePoints = 75;
+  const int numTimePoints = 50;
   const double timeStepSize = 0.5;
   
   mjModel* m = NULL;

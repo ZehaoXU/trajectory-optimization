@@ -20,6 +20,7 @@ namespace trajectoryOptimization::cost{
 		const int trajectoryDimension;
 		const int controlStartIndex; 
 		const int controlEndIndex;
+		const int worldDimension;
 		std::vector<unsigned> controlIndices;
 		DynamicFunctionMujoco contactForce;
 		public:
@@ -33,7 +34,8 @@ namespace trajectoryOptimization::cost{
 									trajectoryDimension(numberOfPoints * pointDimension),
 									controlStartIndex(pointDimension - controlDimension),
 									controlEndIndex(pointDimension),
-									contactForce(contactForce)
+									contactForce(contactForce),
+									worldDimension(controlDimension)
 								{
 									assert(controlDimension<pointDimension);
 
@@ -56,28 +58,21 @@ namespace trajectoryOptimization::cost{
 
 				std::for_each(controlIndices.begin(), controlIndices.end(), addToControlSquareSum);
 
-				std::vector<constraint::ConstraintFunction> constraints;
-				const unsigned kinematicViolationConstraintStartIndex = 0;
-				const unsigned kinematicViolationConstraintEndIndex = kinematicViolationConstraintStartIndex + numberOfPoints - 1;
-				const int numberVariablesX = pointDimension * numberOfPoints;
-
-				constraints = constraint::applyKinematicViolationConstraintsUsingMujoco(constraints,
-																				contactForce,
-																				pointDimension,
-																				pointDimension,
-																				kinematicViolationConstraintStartIndex,
-																				kinematicViolationConstraintEndIndex,
-																				0.5);
-				const constraint::ConstraintFunction stackedConstraintFunction = constraint::StackConstriants(numberVariablesX, constraints);
-				std::vector<double> contactForceVector = stackedConstraintFunction(trajectoryPointer);
-
-				double contactForceSum = 0;
-				for(int i = 0; i < contactForceVector.size(); i++)
+				double contactPositionSquareSum = 0;
+				const auto addToContactPositionSquareSum = [&] (const unsigned index)
 				{
-					contactForceSum += contactForceVector[i];
-				}
+					const auto nowPosition = trajectoryPointer + index * pointDimension;
+					const auto nowVelocity = nowPosition + worldDimension;
+					const auto nowControl = nowVelocity + worldDimension;
+					const auto force = contactForce(nowPosition, nowVelocity, nowControl);
+					std::vector<mjtNum> contactPosition(force, force + worldDimension);
+					for(int i = 0; i < contactPosition.size(); i ++)
+						contactPositionSquareSum += std::pow(contactPosition[i], 2) * 10000;
+				};
+				std::vector<unsigned> numberOfPointsRange = ranges::view::ints((unsigned) 0, numberOfPoints);
+				std::for_each(numberOfPointsRange.begin(), numberOfPointsRange.end(), addToContactPositionSquareSum);
 
-				return controlSquareSum + contactForceSum;
+				return controlSquareSum + contactPositionSquareSum;
 			}  
 	};
 }//namespace
