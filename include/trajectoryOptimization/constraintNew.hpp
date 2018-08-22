@@ -233,7 +233,7 @@ namespace trajectoryOptimization::constraint {
 										controlDimension(pointDimension - positionDimension - velocityDimension),
 										currentKinematicsStartIndex(timeIndex * pointDimension),
 										nextKinematicsStartIndex((timeIndex+1) * pointDimension),
-										contactForceDimension(1),
+										contactForceDimension(2),
 										forceDimensionRange(ranges::view::ints((unsigned) 0, contactForceDimension)) {
 											assert(positionDimension == velocityDimension);
 										}
@@ -255,7 +255,7 @@ namespace trajectoryOptimization::constraint {
 				std::transform(forceDimensionRange.begin(), forceDimensionRange.end(),
 								forceSquare.begin(),
 								[contactForce](const auto index) {
-									return std::pow(contactForce[index], 2);
+									return log10(std::abs(contactForce[index]) + 1) / 10;
 								});
 
 				return forceSquare;

@@ -29,7 +29,7 @@ int main(int argv, char* argc[])
   const int kinematicDimension = worldDimension * 2;
   const int controlDimension = worldDimension;
   const int timePointDimension = kinematicDimension + controlDimension;
-  const int numTimePoints = 150;
+  const int numTimePoints = 75;
   const double timeStepSize = 0.5;
   
   mjModel* m = NULL;
@@ -55,7 +55,7 @@ int main(int argv, char* argc[])
 
   const numberVector xStartingPoint(numberVariablesX, 0);
 
-  const auto costFunction = cost::GetControlSquareSum(numTimePoints, timePointDimension, controlDimension);
+  const auto costFunction = cost::GetControlSquareSum(numTimePoints, timePointDimension, controlDimension, contactForce);
   EvaluateObjectiveFunction objectiveFunction = [costFunction](Index n, const Number* x) {
     return costFunction(x);
   };
@@ -73,13 +73,13 @@ int main(int argv, char* argc[])
                                                               startTimeIndex,
                                                               startPoint));
   
-  const unsigned randomTargetTimeIndex = 125;
+  const unsigned randomTargetTimeIndex = 45;
   const std::vector<double> randomTarget = {4, 4, 0, 0, 0, 0, 0, 0, 0};
-  constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
-                                                              timePointDimension,
-                                                              kinematicDimension,
-                                                              randomTargetTimeIndex,
-                                                              randomTarget));
+  // constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
+  //                                                             timePointDimension,
+  //                                                             kinematicDimension,
+  //                                                             randomTargetTimeIndex,
+  //                                                             randomTarget));
   
   const unsigned kinematicViolationConstraintStartIndex = 0;
   const unsigned kinematicViolationConstraintEndIndex = kinematicViolationConstraintStartIndex + numTimePoints - 1;
@@ -90,13 +90,13 @@ int main(int argv, char* argc[])
                                                                 kinematicViolationConstraintStartIndex,
                                                                 kinematicViolationConstraintEndIndex,
                                                                 timeStepSize);
-  constraints = constraint::applyContactForceSquare(constraints,
-                                                    contactForce,
-                                                    timePointDimension,
-                                                    worldDimension,
-                                                    kinematicViolationConstraintStartIndex,
-                                                    kinematicViolationConstraintEndIndex,
-                                                    timeStepSize);
+  // constraints = constraint::applyContactForceSquare(constraints,
+  //                                                   contactForce,
+  //                                                   timePointDimension,
+  //                                                   worldDimension,
+  //                                                   kinematicViolationConstraintStartIndex,
+  //                                                   kinematicViolationConstraintEndIndex,
+  //                                                   timeStepSize);
 
   constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
                                                                 timePointDimension,

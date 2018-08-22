@@ -4,11 +4,14 @@
 #include <range/v3/view.hpp> 
 
 #include "utilities.hpp"
+#include "constraintNew.hpp"
 
 
 namespace trajectoryOptimization::cost{
 
 	using namespace trajectoryOptimization;
+	using namespace trajectoryOptimization::constraint;
+	using namespace trajectoryOptimization::dynamic;
 
 	class GetControlSquareSum {
 		const unsigned numberOfPoints;
@@ -18,16 +21,19 @@ namespace trajectoryOptimization::cost{
 		const int controlStartIndex; 
 		const int controlEndIndex;
 		std::vector<unsigned> controlIndices;
+		DynamicFunctionMujoco contactForce;
 		public:
 			GetControlSquareSum(const unsigned numberOfPoints,
 								const unsigned pointDimension,
-								const unsigned controlDimension):
+								const unsigned controlDimension,
+								DynamicFunctionMujoco contactForce):
 									numberOfPoints(numberOfPoints),
 									pointDimension(pointDimension),
 									controlDimension(controlDimension),
 									trajectoryDimension(numberOfPoints * pointDimension),
 									controlStartIndex(pointDimension - controlDimension),
-									controlEndIndex(pointDimension)
+									controlEndIndex(pointDimension),
+									contactForce(contactForce)
 								{
 									assert(controlDimension<pointDimension);
 
@@ -50,7 +56,28 @@ namespace trajectoryOptimization::cost{
 
 				std::for_each(controlIndices.begin(), controlIndices.end(), addToControlSquareSum);
 
-				return controlSquareSum;
+				std::vector<constraint::ConstraintFunction> constraints;
+				const unsigned kinematicViolationConstraintStartIndex = 0;
+				const unsigned kinematicViolationConstraintEndIndex = kinematicViolationConstraintStartIndex + numberOfPoints - 1;
+				const int numberVariablesX = pointDimension * numberOfPoints;
+
+				constraints = constraint::applyKinematicViolationConstraintsUsingMujoco(constraints,
+																				contactForce,
+																				pointDimension,
+																				pointDimension,
+																				kinematicViolationConstraintStartIndex,
+																				kinematicViolationConstraintEndIndex,
+																				0.5);
+				const constraint::ConstraintFunction stackedConstraintFunction = constraint::StackConstriants(numberVariablesX, constraints);
+				std::vector<double> contactForceVector = stackedConstraintFunction(trajectoryPointer);
+
+				double contactForceSum = 0;
+				for(int i = 0; i < contactForceVector.size(); i++)
+				{
+					contactForceSum += contactForceVector[i];
+				}
+
+				return controlSquareSum + contactForceSum;
 			}  
 	};
 }//namespace

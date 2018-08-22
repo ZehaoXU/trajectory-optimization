@@ -1387,7 +1387,7 @@ int main(int argc, const char** argv)
     if( argc==2 )
         loadmodel(window, argv[1]);
 
-    string data_dir = "../log/data2.txt";
+    string data_dir = "../log/data4.txt";
     initializeTrajectory(data_dir);
     cout << timeStep << "  " << pointDimension << "  " << numberOfPoints << "  " << trajectory.size() << endl;
     cout << scn.maxgeom << endl;
