@@ -65,7 +65,9 @@ namespace trajectoryOptimization::cost{
 					const auto nowVelocity = nowPosition + worldDimension;
 					const auto nowControl = nowVelocity + worldDimension;
 					const auto force = contactForce(nowPosition, nowVelocity, nowControl);
-					contactPositionSquareSum += std::pow(force[0]/1000, 2);
+					contactPositionSquareSum += std::abs(force[0]);
+					contactPositionSquareSum += std::abs(force[1]);
+					contactPositionSquareSum += std::abs(force[2]);
 				};
 				std::vector<unsigned> numberOfPointsRange = ranges::view::ints((unsigned) 0, numberOfPoints);
 				std::for_each(numberOfPointsRange.begin(), numberOfPointsRange.end(), addToContactPositionSquareSum);
