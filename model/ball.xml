@@ -1,5 +1,5 @@
 <mujoco>
-    <option gravity="0 0 0" timestep="0.5"/>
+    <option gravity="0 0 0" timestep="0.3"/>
     <worldbody>
         <geom name='floor' pos='0 0 -0.2' size='5 5 .125' type='plane' condim='3'/>    
         <body name="ball" pos="0 0 0">
@@ -7,18 +7,24 @@
             <joint axis="1 0 0" damping="0" name="slide0" pos="0 0 0" type="slide"/>
             <joint axis="0 1 0" damping="0" name="slide1" pos="0 0 0" type="slide"/>
             <joint axis="0 0 1" damping="0" name="slide2" pos="0 0 0" type="slide"/>
-            <geom type="sphere" size="0.2" mass="100" rgba="0 .9 0 1"/>
+            <geom type="sphere" size="0.2" mass="10" rgba="0 .9 0 1"/>
         </body>
 		<!-- <body mocap="true" name="mocap1" pos="4 4 0">
             <light name="light1" pos="0 0 2" mode="fixed" castshadow="false"/>
 			<geom conaffinity="0" contype="0" pos="0 0 0" rgba=".9 0 0 0.5" size="0.1" type="sphere" />
 		</body> -->
-        <body name="box" pos="1.8 1.8 0">
+        <body name="box1" pos="-1 0 0">
             <light name="light2" pos="0 0 2" mode="fixed" />
-            <geom mass="100" size="0.2 0.2 0.2" type="box" rgba="0 0 0.9 1"/>
+            <geom mass="100" size="0.2 1 0.2" type="box" rgba="0 0 0.9 1"/>
             <!-- <joint axis="1 0 0" name="box:slidex" type="slide" />                
             <joint axis="0 1 0" name="box:slidey" type="slide" /> -->
         </body>
+        <!-- <body name="box2" pos="3.5 3.7 0">
+            <light name="light3" pos="0 0 2" mode="fixed" />
+            <geom mass="100" size="0.2 0.2 0.2" type="box" rgba="0 0 0.9 1"/>
+            <joint axis="1 0 0" name="box:slidex" type="slide" />                
+            <joint axis="0 1 0" name="box:slidey" type="slide" />
+        </body> -->
     </worldbody>
     <actuator>
         <motor gear="1" joint="slide0"/>

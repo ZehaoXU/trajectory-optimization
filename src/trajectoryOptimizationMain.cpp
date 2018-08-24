@@ -29,8 +29,8 @@ int main(int argv, char* argc[])
   const int kinematicDimension = worldDimension * 2;
   const int controlDimension = worldDimension;
   const int timePointDimension = kinematicDimension + controlDimension;
-  const int numTimePoints = 50;
-  const double timeStepSize = 0.5;
+  const int numTimePoints = 100;
+  const double timeStepSize = 0.1;
   
   mjModel* m = NULL;
   mjData* d = NULL;
@@ -46,9 +46,9 @@ int main(int argv, char* argc[])
   const int numberVariablesX = timePointDimension * numTimePoints;
 
   const int startTimeIndex = 0;
-  const numberVector startPoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  const numberVector startPoint = {0, 0, 0, -1, 0, 0, 0, 0, 0};
   const int goalTimeIndex = numTimePoints - 1;
-  const numberVector goalPoint = {5, 5, 0, 0, 0, 0, 0, 0, 0};
+  const numberVector goalPoint = {5, 0, 0, 0, 0, 0, 0, 0, 0};
 
   const numberVector xLowerBounds(numberVariablesX, -100);
   const numberVector xUpperBounds(numberVariablesX, 100);

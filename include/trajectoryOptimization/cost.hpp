@@ -58,29 +58,32 @@ namespace trajectoryOptimization::cost{
 
 				std::for_each(controlIndices.begin(), controlIndices.end(), addToControlSquareSum);
 
-				double contactPositionSquareSum = 0;
-				const auto addToContactPositionSquareSum = [&] (const unsigned index)
-				{
-					const auto nowPosition = trajectoryPointer + index * pointDimension;
-					const auto nowVelocity = nowPosition + worldDimension;
-					const auto nowControl = nowVelocity + worldDimension;
-					const auto force = contactForce(nowPosition, nowVelocity, nowControl);
-					contactPositionSquareSum += std::abs(force[0]);
-					contactPositionSquareSum += std::abs(force[1]);
-					contactPositionSquareSum += std::abs(force[2]);
-				};
-				std::vector<unsigned> numberOfPointsRange = ranges::view::ints((unsigned) 0, numberOfPoints);
-				std::for_each(numberOfPointsRange.begin(), numberOfPointsRange.end(), addToContactPositionSquareSum);
+				// double contactPositionSquareSum = 0;
+				// const auto addToContactPositionSquareSum = [&] (const unsigned index)
+				// {
+				// 	const auto nowPosition = trajectoryPointer + index * pointDimension;
+				// 	const auto nowVelocity = nowPosition + worldDimension;
+				// 	const auto nowControl = nowVelocity + worldDimension;
+				// 	const auto force = contactForce(nowPosition, nowVelocity, nowControl);
+				// 	contactPositionSquareSum += std::abs(force[0]) * 100;
+				// 	contactPositionSquareSum += std::abs(force[1]) * 100;
+				// 	contactPositionSquareSum += std::abs(force[2]) * 100;
+				// 	contactPositionSquareSum += std::abs(force[6]) * 100;
+				// 	contactPositionSquareSum += std::abs(force[7]) * 100;
+				// 	contactPositionSquareSum += std::abs(force[8]) * 100;
+				// };
+				// std::vector<unsigned> numberOfPointsRange = ranges::view::ints((unsigned) 0, numberOfPoints);
+				// std::for_each(numberOfPointsRange.begin(), numberOfPointsRange.end(), addToContactPositionSquareSum);
 
-				double zPositionSquareSum = 0;
-				const auto addTozPositionSquareSum = [&] (const unsigned index)
-				{
-					const auto nowPosition = trajectoryPointer + index * pointDimension;
-					zPositionSquareSum += std::pow(nowPosition[2], 2);
-				};
-				std::for_each(numberOfPointsRange.begin(), numberOfPointsRange.end(), addTozPositionSquareSum);
+				// double zPositionSquareSum = 0;
+				// const auto addTozPositionSquareSum = [&] (const unsigned index)
+				// {
+				// 	const auto nowPosition = trajectoryPointer + index * pointDimension;
+				// 	zPositionSquareSum += std::pow(nowPosition[2], 2);
+				// };
+				// std::for_each(numberOfPointsRange.begin(), numberOfPointsRange.end(), addTozPositionSquareSum);
 
-				return controlSquareSum + contactPositionSquareSum + zPositionSquareSum;
+				return controlSquareSum;
 			}  
 	};
 }//namespace
