@@ -343,6 +343,3 @@ namespace trajectoryOptimization::constraint {
 		return constraints;
 	}
 }
-
-// block dynamics
-// violation calculate
