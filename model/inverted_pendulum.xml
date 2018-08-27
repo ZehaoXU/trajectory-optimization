@@ -1,0 +1,47 @@
+<mujoco model="inverted pendulum">  
+    <option timestep="0.01" iterations="20">        
+        <flag sensornoise="enable"/>
+    </option>
+	
+    <default>
+    <geom  rgba="0.45 0.6 0.6 1"/>
+        <site type="sphere" size="0.02"/>
+    </default>
+    <worldbody>
+        <light directional="true" cutoff="4" exponent="20" diffuse="1 1 1" specular="0 0 0" pos=".9 .3 2.5" dir="-.9 -.3 -2.5 "/>
+
+        <!-- ======= Ground ======= -->
+        <geom name="ground" type="plane" pos="0 0 0" size="0.5 1 2" rgba=" .25 .26 .25 1"/>
+        <site name="rFix" pos="0 -.2 .005"/>
+        <site name="lFix" pos="0 .2 .005"/>
+
+        <!-- ======= Beam ======= -->
+        <body name="beam" pos="0 0 .5">
+            <!--density of the rod is ten times smaller than other objects (e.g. the ball) for a better point mass approximation-->
+            <geom name="rod" type="cylinder" pos="0 0 0.0" size=".01 .1" density="100"/>
+            <geom pos="0 0 -.1" type="capsule" size=".01 .2" quat="0.707 0.707 0 0"/>
+            <joint name="pivot" pos="0 0 -0.1" axis="0 1 0" limited="false" damping=".05" type="hinge" />
+            <site name="rBeam" pos="0 -.2 -.1"/>
+            <site name="lBeam" pos="0 .2 -.1"/>
+            <body name="ballbody" pos="0 0 0.1">
+                <geom name="ballgeom" type="sphere" size=".05"/>
+            </body>
+        </body>
+    </worldbody>
+    <tendon>
+        <spatial name="lThread" width="0.01">
+            <site site="lBeam"/>
+            <site site="lFix"/>
+        </spatial>
+        <spatial name="rThread"  width="0.01">
+        <site site="rBeam"/>
+        <site site="rFix"/>
+        </spatial>
+    </tendon>
+    <actuator>
+        <motor joint='pivot' name='motor' gear="1" />
+    </actuator>
+    <sensor>
+        <jointpos name="encoder" joint="pivot" noise="0.001"/>
+    </sensor>
+</mujoco>
