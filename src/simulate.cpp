@@ -1025,20 +1025,6 @@ void setPosition(int index)
     mju_zero(d->qfrc_applied, m->nv);
 }
 
-void drawPoint()
-{
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(1.0, 0.0, 0.0);
-    glPointSize(40.0f);
-
-    glBegin(GL_POINTS);
-    glVertex3d(trajectory[timeIndex * pointDimension], trajectory[timeIndex * pointDimension + 1], trajectory[timeIndex * pointDimension + 2]);
-    glEnd();
-
-    glFlush();
-}
-
 // advance simulation
 void simulation(void)
 {
@@ -1207,8 +1193,8 @@ void render(GLFWwindow* window)
     // update scene
     mjv_updateScene(m, d, &vopt, &pert, &cam, mjCAT_ALL, &scn);
 
-    addGeomsToScene();
-    cout << scn.ngeom << endl;
+    // addGeomsToScene();
+    // cout << scn.ngeom << endl;
 
     mjr_setBuffer(mjFB_WINDOW, &con);
     // render
@@ -1387,10 +1373,9 @@ int main(int argc, const char** argv)
     if( argc==2 )
         loadmodel(window, argv[1]);
 
-    string data_dir = "../log/data4.txt";
+    string data_dir = "../log/inverted1.txt";
     initializeTrajectory(data_dir);
     cout << timeStep << "  " << pointDimension << "  " << numberOfPoints << "  " << trajectory.size() << endl;
-    cout << scn.maxgeom << endl;
 
     // main loop
     while( !glfwWindowShouldClose(window) )

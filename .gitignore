@@ -7,8 +7,7 @@
 include/trajectoryOptimization/mujocoDynamic.hpp
 test/src/mujocoDynamicTest.cpp
 src/trajOld.cpp
-src/basic.cpp
-src/mjvive.cpp
+src/simulateOld.cpp
 
 # Don't push local properties
 cmake/LocalProperties.cmake

@@ -24,12 +24,12 @@ int main(int argv, char* argc[])
   const char* velocityFilename = "velocity.txt";
   const char* controlFilename = "control.txt";
 
-  const int worldDimension = 3;
+  const int worldDimension = 1;
   // pos, vel, acc (control)
   const int kinematicDimension = worldDimension * 2;
   const int controlDimension = worldDimension;
   const int timePointDimension = kinematicDimension + controlDimension;
-  const int numTimePoints = 100;
+  const int numTimePoints = 50;
   const double timeStepSize = 0.1;
   
   mjModel* m = NULL;
@@ -37,7 +37,7 @@ int main(int argv, char* argc[])
   mj_activate("../mjkey.txt");    
   // load and compile model
   char error[1000] = "ERROR: could not load binary model!";
-  m = mj_loadXML("../model/ball.xml", 0, error, 1000);
+  m = mj_loadXML("../model/inverted_pendulum.xml", 0, error, 1000);
   d = mj_makeData(m);
   
   const dynamic::DynamicFunctionMujoco mujocoDynamics = dynamic::GetAccelerationUsingMujoco(m, d, worldDimension, timeStepSize);
@@ -46,9 +46,9 @@ int main(int argv, char* argc[])
   const int numberVariablesX = timePointDimension * numTimePoints;
 
   const int startTimeIndex = 0;
-  const numberVector startPoint = {0, 0, 0, -1, 0, 0, 0, 0, 0};
+  const numberVector startPoint = {0, 0, 0};
   const int goalTimeIndex = numTimePoints - 1;
-  const numberVector goalPoint = {5, 0, 0, 0, 0, 0, 0, 0, 0};
+  const numberVector goalPoint = {3.14, 0, 0};
 
   const numberVector xLowerBounds(numberVariablesX, -100);
   const numberVector xUpperBounds(numberVariablesX, 100);
