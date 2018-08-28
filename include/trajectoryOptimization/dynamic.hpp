@@ -54,11 +54,12 @@ namespace trajectoryOptimization::dynamic {
 	  private:
 		const double dt;
 		const int worldDimension;
+		const int controlDimension;
 		mjModel* m;
 		mjData* d;
 	  public:
-		GetAccelerationUsingMujoco(const mjModel* _m, mjData* _d, const int dimension = 3, const double dTime = 0.5):
-			worldDimension(dimension), dt(dTime)
+		GetAccelerationUsingMujoco(const mjModel* _m, mjData* _d, const int dimension, const int controlDimension, const double dTime):
+			worldDimension(dimension), dt(dTime),controlDimension(controlDimension)
 		{
 			m = mj_copyModel(NULL, _m);
 			d = mj_copyData(NULL, _m, _d);
@@ -70,7 +71,7 @@ namespace trajectoryOptimization::dynamic {
 			
 			mju_copy(d->qpos, position, worldDimension);
 			mju_copy(d->qvel, velocity, worldDimension);
-			mju_copy(d->ctrl, control, worldDimension);
+			mju_copy(d->ctrl, control, controlDimension);
 			mj_forward(m, d);
 
 			return d->qacc;

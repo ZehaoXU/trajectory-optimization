@@ -43,12 +43,12 @@ if (traj_opt_build_tests)
 endif()
 
 if (traj_opt_build_samples)
-	add_executable(simulate src/simulate.cpp)
+	add_executable(123 src/trajectoryOptimizationMain.cpp)
 	message(${IPOPT_FOUND})
 	message(${IPOPT_INCLUDE_DIRS})
 	message(${IPOPT_DIR})
 	#target_include_directories(trajectoryOptimizationSample PRIVATE ${IPOPT_DIR}/include)
-	target_link_libraries(simulate
+	target_link_libraries(123
 		PUBLIC
 			Ipopt::Ipopt Rangev3::Rangev3 Mujoco::Mujoco
 		PRIVATE
