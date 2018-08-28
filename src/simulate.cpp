@@ -8,6 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <math.h>
 
 using namespace std;
  
@@ -131,10 +132,13 @@ char opt_content[1000];
 
 int pointDimension;
 int positionDimension;
+int controlDimension;
 int numberOfPoints;
 double timeStep;
 ifstream dataFile;
 vector<double> trajectory;
+
+string model_dir;
 
 int timeIndex = 0;
 vector<mjvGeom> geoms;
@@ -161,12 +165,19 @@ void initializeTrajectory(string dir)
             timeStep = val;
             continue;
         }
+        if (label.compare("controlDimension:") == 0)
+        {
+            double val;
+            ss >> val;
+            controlDimension = val;
+            continue;
+        }
         if (label.compare("pointDimension:") == 0)
         {
             int val;
             ss >> val;
             pointDimension = val;
-            positionDimension = pointDimension / 3;
+            positionDimension = (pointDimension - controlDimension) / 2;
             continue;
         }
         if (label.compare("numberOfPoints:") == 0)
@@ -174,6 +185,13 @@ void initializeTrajectory(string dir)
             int val;
             ss >> val;
             numberOfPoints = val;
+            continue;
+        }
+        if (label.compare("model:") == 0)
+        {
+            string val;
+            ss >> val;
+            model_dir = val;
             continue;
         }
         if (label.compare(to_string(count)) == 0)
@@ -1370,12 +1388,15 @@ int main(int argc, const char** argv)
     mjcb_time = timer;
 
     // load model if filename given as argument
+    string data_dir;
     if( argc==2 )
-        loadmodel(window, argv[1]);
+        data_dir = argv[1];
 
-    string data_dir = "../log/inverted1.txt";
     initializeTrajectory(data_dir);
+    const char* model = model_dir.c_str();
+    loadmodel(window, model);
     cout << timeStep << "  " << pointDimension << "  " << numberOfPoints << "  " << trajectory.size() << endl;
+    cout << model_dir << endl;
 
     // main loop
     while( !glfwWindowShouldClose(window) )
