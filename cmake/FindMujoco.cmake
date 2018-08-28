@@ -13,7 +13,7 @@
 
 if (NOT EXISTS ${MUJOCO_ROOT_DIR})
 	message(WARNING  "MUJOCO_ROOT_DIR DOES NOT EXIST, SETTING TO /USR/LOCAL")
-	set(MUJOCO_ROOT_DIR "/home/jasper/.mujoco/mjpro150")
+	set(MUJOCO_ROOT_DIR "/home/taharabun/Documents/mjpro150/")
 endif()
 message(STATUS "MuJoCo path: " ${MUJOCO_ROOT_DIR})
 
@@ -21,13 +21,9 @@ set(MUJOCO_INCLUDE_DIR "${MUJOCO_ROOT_DIR}/include")
 set(MUJOCO_LIB_DIR "${MUJOCO_ROOT_DIR}/bin")
 
 find_library(MUJOCO_LIB NAMES mujoco mujoco150 PATHS ${MUJOCO_LIB_DIR})
-message(${MUJOCO_LIB})
 find_library(LIB_GL NAMES GL gl OpenGL PATHS ${MUJOCO_LIB_DIR})
-message(${LIB_GL})
 find_library(LIB_GLEW NAMES glew PATHS ${MUJOCO_LIB_DIR})
-message(${LIB_GLEW})
 find_library(LIB_GLFW NAMES glfw glfw.3 PATHS ${MUJOCO_LIB_DIR})
-message(${LIB_GLFW})
 
 set(MUJOCO_LIBRARIES "" CACHE STRING "Mujoco libraries" FORCE)
 list(APPEND MUJOCO_LIBRARIES ${MUJOCO_LIB})

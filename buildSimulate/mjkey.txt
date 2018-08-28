@@ -1,0 +1,21 @@
+MuJoCo Pro Lab license activation key, number 6268, type 6.
+
+Issued to Josh Tenenbaum, MIT.
+
+Expires October 25, 2018.
+
+Do not share this file with anyone other than the users covered
+by your license agreement with Roboti LLC. This file activates
+MuJoCo Pro on any computer running any supported OS.
+
+Do not modify this file. Its entire content, including the
+plain text section, is used by the activation manager.
+
+148a7ecd066633402ee7970f562e3f18f8ba78c9ce5bb0643c929029a27e206c
+8b8b762da5da3d8df66b85ab9be9fb91c6d7706ae8715e939d5ae211aae5532a
+5cf5ff509277a043c72bd9c992a1f8f20ed6de7ad3d639874528454bc6d55fb7
+280accfadb558d54be9d804e054f88fb19f01ca2dc2728d6c0d34a556037c94f
+b1ae2a69adf915d91d0ac2761966e1f74ba134e12344e109e0f9e6e7c93b719b
+2d3e9564c81cc7d675ee0699e064a6ba31278899f1a7fb23f3398c1151aa9618
+a2a2cd4b4d47b821b481fe1149d65dc9ac630a86ecc96af56df2fd63d8947d6c
+e2afc0b389442a4e2f7ba7b65e8e0eab1f83bc1b320ca61dae9a936267cf4e23

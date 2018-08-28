@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/simulate.dir/src/simulate.cpp.o  -o simulate  -L/home/taharabun/Documents/mjpro150/bin -Wl,-rpath,/home/taharabun/Documents/mjpro150/bin -lmujoco150 /usr/lib/x86_64-linux-gnu/libGL.so -lglew /home/taharabun/Documents/mjpro150/bin/libglfw.so 
