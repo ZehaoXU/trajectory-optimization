@@ -1,10 +1,10 @@
 <mujoco model="inverted pendulum">  
-    <option timestep="0.033" iterations="20" gravity="0 0 0">        
+    <option timestep="0.1" iterations="20" gravity="0 0 -9.81">        
         <flag sensornoise="enable"/>
     </option>
 	
     <default>
-    <geom rgba="0.45 0.6 0.6 1"/>
+    <geom  rgba="0.45 0.6 0.6 1"/>
         <site type="sphere" size="0.02"/>
     </default>
     <worldbody>
@@ -16,14 +16,17 @@
         <site name="lFix" pos="0 .2 .005"/>
 
         <!-- ======= Beam ======= -->
-        <body name="beam" pos="0 0 .5">
+        <body name="beam" pos="0 0 .6">
             <!--density of the rod is ten times smaller than other objects (e.g. the ball) for a better point mass approximation-->
             <geom name="rod" type="cylinder" pos="0 0 -.2" size=".01 .1" density="100"/>
             <geom pos="0 0 -.1" type="capsule" size=".01 .2" quat="0.707 0.707 0 0"/>
             <joint name="pivot" pos="0 0 -0.1" axis="0 1 0" limited="false" damping=".05" type="hinge" />
+            <geom name="midball" type="sphere" pos="0 0 -0.3" size=".05" density="10000" />
             <site name="rBeam" pos="0 -.2 -.1"/>
             <site name="lBeam" pos="0 .2 -.1"/>
-            <body name="ballbody" pos="0 0 -0.3">
+            <body name="ballbody" pos="0 0 -0.5">
+                <geom name="pole2" type="cylinder" pos="0 0 0.1" size=".01 .1" density="100" />
+                <joint name="pole2" pos="0 0 0.2" axis="0 1 0" limited="false" damping=".05" type="hinge" />
                 <geom name="ballgeom" type="sphere" size=".05"/>
             </body>
         </body>
