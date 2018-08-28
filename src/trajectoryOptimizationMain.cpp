@@ -27,7 +27,7 @@ int main(int argv, char* argc[])
   const int worldDimension = 1;
   // pos, vel, acc (control)
   const int kinematicDimension = worldDimension * 2;
-  const int controlDimension = worldDimension;
+  const int controlDimension = 2;
   const int timePointDimension = kinematicDimension + controlDimension;
   const int numTimePoints = 50;
   const double timeStepSize = 0.1;
