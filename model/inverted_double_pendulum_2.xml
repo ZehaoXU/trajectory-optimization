@@ -1,0 +1,50 @@
+<mujoco model="inverted double pendulum">  
+    <option timestep="0.01" iterations="20" gravity="0 0 -9.81">        
+        <flag sensornoise="enable"/>
+    </option>
+	
+    <default>
+    <geom  rgba="0.45 0.6 0.6 1"/>
+        <site type="sphere" size="0.02"/>
+    </default>
+    <worldbody>
+        <light directional="true" cutoff="4" exponent="20" diffuse="1 1 1" specular="0 0 0" pos=".9 .3 2.5" dir="-.9 -.3 -2.5 "/>
+
+        <!-- ======= Ground ======= -->
+        <geom name="ground" type="plane" pos="0 0 0" size="0.5 1 2" rgba=" .25 .26 .25 1"/>
+        <site name="rFix" pos="0 -.2 .005"/>
+        <site name="lFix" pos="0 .2 .005"/>
+
+        <!-- ======= Beam ======= -->
+        <body name="beam1" pos="0 0 1">
+            <!--density of the rod is ten times smaller than other objects (e.g. the ball) for a better point mass approximation-->
+            <geom name="rod1" type="cylinder" fromto="0 0 -0.1 0 0 -0.3" size=".01 .1" density="100" rgba="0.1 0.1 0.6 1"/>
+            <geom pos="0 0 -.1" type="capsule" size=".01 .2" quat="0.707 0.707 0 0"/>
+            <joint name="pivot1" pos="0 0 -0.1" axis="0 1 0" limited="false" damping=".05" type="hinge" />
+            <site name="rBeam1" pos="0 -.2 -.1"/>
+            <site name="lBeam1" pos="0 .2 -.1"/>
+		<body name="pendulum2" pos="0 0 -.2">
+ 			<geom name="rod2" type="cylinder" pos="0 0 -0.2" size=".01 .1" density="100" rgba="0.6 0.1 0.6 1"/>
+           		 <joint name="pivot2" pos="0 0 -0.1" axis="0 1 0" limited="false" damping=".05" type="hinge" />
+           		
+
+      			      <body name="ballbody" pos="0 0 -0.3">
+      		  	        <geom name="ballgeom" type="sphere" size=".05"/>
+      		  	    </body>
+  		  </body>
+        </body>
+    </worldbody>
+    <tendon>
+        <spatial name="lThread" width="0.01">
+            <site site="lBeam1"/>
+            <site site="lFix"/>
+        </spatial>
+        <spatial name="rThread"  width="0.01">
+        <site site="rBeam1"/>
+        <site site="rFix"/>
+        </spatial>
+    </tendon>
+    <actuator>
+        <motor joint='pivot1' name='motor' gear="1" />
+    </actuator>
+</mujoco>
