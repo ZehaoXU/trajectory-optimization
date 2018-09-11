@@ -94,7 +94,7 @@ sudo apt-get install gnuplot
 
 2) Download MuJoCo Pro 150 from MuJoCo website https://www.roboti.us/index.html , choose "mjpro150 linux".
 
-3) Unpack the file in your preferred location (home as an example), and **copy the license to the the bin folder** (~/mjpro150/bin).
+3) Unpack the file in your preferred location (home as an example), and **copy the license to the bin folder** (~/mjpro150/bin).
 
 4) Add the environment variable to ~/.bashrc. 
 
