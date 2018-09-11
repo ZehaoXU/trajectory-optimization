@@ -67,7 +67,7 @@ cd ~/Ipopt-3.12.4/
 mkdir build
 cd build
 ../configure
-make -j 4` #Compile using 4 cores (if you have them) 
+make -j 4 #Compile using 4 cores (if you have them) 
 make install
 ```
 
