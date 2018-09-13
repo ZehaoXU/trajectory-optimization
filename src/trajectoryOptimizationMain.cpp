@@ -55,7 +55,7 @@ int main(int argv, char* argc[])
 
   const numberVector xStartingPoint(numberVariablesX, 0);
 
-  const auto costFunction = cost::GetControlSquareSum(numTimePoints, timePointDimension, controlDimension, contactForce);
+  const auto costFunction = cost::GetControlSquareSum(numTimePoints, timePointDimension, controlDimension);
   EvaluateObjectiveFunction objectiveFunction = [costFunction](Index n, const Number* x) {
     return costFunction(x);
   };

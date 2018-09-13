@@ -100,8 +100,7 @@ namespace trajectoryOptimization::dynamic {
 			mju_copy(d->qvel, velocity, worldDimension);
 			mju_copy(d->ctrl, control, worldDimension);
 			mj_forward(m, d);
-			for(int i = 1; i < d->ncon; i ++ )
-				mj_contactForce(m, d, i, contactForce + (i - 1) * contactForceDimension);
+			mj_contactForce(m, d, 1, contactForce);
 
 			return contactForce;
 		}		

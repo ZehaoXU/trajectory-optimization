@@ -26,15 +26,13 @@ namespace trajectoryOptimization::cost{
 		public:
 			GetControlSquareSum(const unsigned numberOfPoints,
 								const unsigned pointDimension,
-								const unsigned controlDimension,
-								DynamicFunctionMujoco contactForce):
+								const unsigned controlDimension):
 									numberOfPoints(numberOfPoints),
 									pointDimension(pointDimension),
 									controlDimension(controlDimension),
 									trajectoryDimension(numberOfPoints * pointDimension),
 									controlStartIndex(pointDimension - controlDimension),
 									controlEndIndex(pointDimension),
-									contactForce(contactForce),
 									worldDimension(controlDimension)
 								{
 									assert(controlDimension<pointDimension);
