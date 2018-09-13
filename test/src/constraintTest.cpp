@@ -188,6 +188,7 @@ class mujocoDynamic:public::Test{
 		const unsigned kinematicDimension = 4;
 		unsigned positionDimension;
 		unsigned velocityDimension;
+		unsigned controlDimension;
 		const double dt = 0.5;
 		std::vector<double> trajectory;
 		const double* trajectoryPtr;
@@ -202,6 +203,8 @@ class mujocoDynamic:public::Test{
 			std::vector<double> point3 = {2.5, 3, 4.5, 6, 3, 5};
 			positionDimension = kinematicDimension/2;
 			velocityDimension = positionDimension;
+			controlDimension = 2;
+
 			trajectory = yield_from(view::concat(point1, point2, point3));
 			assert (trajectory.size() == numberOfPoints*pointDimension);
 			trajectoryPtr = trajectory.data();
@@ -222,7 +225,7 @@ class mujocoDynamic:public::Test{
 
 TEST_F(mujocoDynamic, oneTimeStepViolation){
 	const unsigned timeIndex = 0;
-	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension, dt);
+	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension,controlDimension, dt);
 	auto getKinematicViolation = GetKinematicViolationUsingMujoco(mujocoDynamics,
 														pointDimension,
 														positionDimension,
@@ -237,7 +240,7 @@ TEST_F(mujocoDynamic, oneTimeStepViolation){
 TEST_F(mujocoDynamic, twoTimeStepsViolation){
 	const unsigned timeIndexZero = 0;
 	const unsigned timeIndexOne = 1;
-	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension, dt);
+	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension,controlDimension, dt);
 	auto getTime0KinematicViolation = GetKinematicViolationUsingMujoco(mujocoDynamics,
 															pointDimension,
 															positionDimension,
@@ -268,7 +271,7 @@ TEST_F(mujocoDynamic, twoTimeStepsViolationUsingApplyFunction){
 	const unsigned numTimePoints = 3;
 	const unsigned endTimeIndex = startTimeIndex + numTimePoints - 1;
 	const unsigned constraintIndex = 0;
-	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension, dt);
+	DynamicFunctionMujoco mujocoDynamics = GetAccelerationUsingMujoco(_m, _d, positionDimension,controlDimension, dt);
 
 	std::vector<ConstraintFunction> twoStepConstraintFunctions;
 
@@ -303,8 +306,8 @@ class contactForce:public::Test{
 	
 		virtual void SetUp() override
 		{
-			std::vector<double> point1 = {0, 0, 3, 4, 1, 2};	// not collide
-			std::vector<double> point2 = {2, 1.6, 3.5, 5, 2, 4};	// collide
+			std::vector<double> point1 = {0, 0, 3, 4, 1, 2};	// not collision
+			std::vector<double> point2 = {2, 1.6, 3.5, 5, 2, 4};	// collision
 			positionDimension = kinematicDimension/2;
 			velocityDimension = positionDimension;
 			trajectory = yield_from(view::concat(point1, point2));
