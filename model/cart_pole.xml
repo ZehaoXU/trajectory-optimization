@@ -4,7 +4,7 @@
 		<joint armature="0" damping="0.05" limited="false"/>
 		<geom contype="0" friction="1 0.1 0.1" rgba=" .8 .8 .8 1"/>
 	</default>
-	<option timestep="0.02" gravity="0 0 -9.81" integrator="RK4" />
+	<option timestep="0.033" gravity="0 0 -9.81" integrator="RK4" />
 	<size nstack="3000"/>
 	<worldbody>
         <light directional="true" cutoff="4" exponent="20" diffuse="1 1 1" specular="0 0 0" pos=".9 .3 2.5" dir="-.9 -.3 -2.5 "/>

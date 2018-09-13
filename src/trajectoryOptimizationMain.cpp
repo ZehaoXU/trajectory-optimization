@@ -1,12 +1,13 @@
 #include "coin/IpIpoptApplication.hpp"
 #include "coin/IpSolveStatistics.hpp"
 #include <iostream>
+#include <string>
 #include <algorithm>
 #include <functional>
 #include <range/v3/view.hpp>
 #include "mujoco.h"
 
-#include "trajectoryOptimization/constraintNew.hpp"
+#include "trajectoryOptimization/constraint.hpp"
 #include "trajectoryOptimization/cost.hpp"
 #include "trajectoryOptimization/derivative.hpp"
 #include "trajectoryOptimization/dynamic.hpp"
@@ -17,15 +18,15 @@ using namespace Ipopt;
 using namespace trajectoryOptimization::optimizer;
 using namespace ranges;
 using namespace trajectoryOptimization;
+using namespace std;
 
 int main(int argv, char* argc[])
 {
-  const char* positionFilename = "position.txt";
-  const char* velocityFilename = "velocity.txt";
-  const char* controlFilename = "control.txt";
+  const string positionFilename = "position.txt";
+  const string velocityFilename = "velocity.txt";
+  const string controlFilename = "control.txt";
 
-  const int worldDimension = 2;
-  // pos, vel, acc (control)
+  const int worldDimension = 2; // worldDimension = positionDimension = velocityDimension
   const int kinematicDimension = worldDimension * 2;
   const int controlDimension = 1;
   const int timePointDimension = kinematicDimension + controlDimension;
@@ -35,9 +36,8 @@ int main(int argv, char* argc[])
   mjModel* m = NULL;
   mjData* d = NULL;
   mj_activate("../mjkey.txt");    
-  // load and compile model
   char error[1000] = "ERROR: could not load binary model!";
-  m = mj_loadXML("../model/cart_pole.xml", 0, error, 1000);
+  m = mj_loadXML("../model/cart_triple_pole.xml", 0, error, 1000);
   d = mj_makeData(m);
   
   const dynamic::DynamicFunctionMujoco mujocoDynamics = dynamic::GetAccelerationUsingMujoco(m, d, worldDimension, controlDimension, timeStepSize);
@@ -48,7 +48,7 @@ int main(int argv, char* argc[])
   const int startTimeIndex = 0;
   const numberVector startPoint = {0, 0, 0, 0, 0};
   const int goalTimeIndex = numTimePoints - 1;
-  const numberVector goalPoint = {0.4, 9.425, 0, 0, 0};
+  const numberVector goalPoint = {0.4, 3.14, 0, 0, 0};
 
   const numberVector xLowerBounds(numberVariablesX, -100);
   const numberVector xUpperBounds(numberVariablesX, 100);
@@ -73,8 +73,10 @@ int main(int argv, char* argc[])
                                                               startTimeIndex,
                                                               startPoint));
   
-  const unsigned randomTargetTimeIndex = 45;
-  const std::vector<double> randomTarget = {4, 4, 0, 0, 0, 0, 0, 0, 0};
+  // if you need a random target, uncomment below
+
+  // const unsigned randomTargetTimeIndex = 45;
+  // const std::vector<double> randomTarget = {0.3, 0, 0, 0, 0};
   // constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
   //                                                             timePointDimension,
   //                                                             kinematicDimension,
@@ -90,6 +92,7 @@ int main(int argv, char* argc[])
                                                                 kinematicViolationConstraintStartIndex,
                                                                 kinematicViolationConstraintEndIndex,
                                                                 timeStepSize);
+                                                                
   // constraints = constraint::applyContactForceSquare(constraints,
   //                                                   contactForce,
   //                                                   timePointDimension,
@@ -140,24 +143,21 @@ int main(int argv, char* argc[])
                         Index m, const Number* g, const Number* lambda,
                         Number objValue, const IpoptData* ipData,
                         IpoptCalculatedQuantities* ipCalculatedQuantities) {
-    printf("\n\nSolution of the primal variables, x\n");
+    cout << "\n\n" << "Solution of the primal variables, x" << endl;
     for (Index i=0; i<n; i++) {
-      printf("x[%d] = %e\n", i, x[i]); 
-    }
-    for (Index i=0; i<n; i++) {
-      printf("%d %e\n", i, x[i]); 
+      cout << i << " " << x[i] << endl;
     }
 
     utilities::outputPositionVelocityControlToFiles(x,
                                                     numTimePoints,
                                                     timePointDimension,
                                                     worldDimension,
-                                                    positionFilename,
-                                                    velocityFilename,
-                                                    controlFilename);
+                                                    positionFilename.c_str(),
+                                                    velocityFilename.c_str(),
+                                                    controlFilename.c_str());
 
-    printf("\n\nObjective value\n");
-    printf("f(x*) = %e\n", objValue); 
+    cout << "\n\nObjective value" << endl;
+    cout << "f(x*) = " << objValue << endl;
   };
  
   SmartPtr<TNLP> trajectoryOptimizer = new TrajectoryOptimizer(numberVariablesX,
@@ -203,7 +203,7 @@ int main(int argv, char* argc[])
     }
   }
   
-  utilities::plotTrajectory(worldDimension, positionFilename, velocityFilename, controlFilename);
+  utilities::plotTrajectory(worldDimension, positionFilename.c_str(), velocityFilename.c_str(), controlFilename.c_str());
 
   mj_deleteData(d);
   mj_deleteModel(m);

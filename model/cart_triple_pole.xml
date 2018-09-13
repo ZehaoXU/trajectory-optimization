@@ -22,11 +22,11 @@
                     <joint axis="0 1 0" name="hinge2" pos="0 0 0" type="hinge" />
                     <geom fromto="0 0 0 0.001 0 -0.4" name="cpole2" rgba="0 0.7 0.7 1" size="0.02 0.3" type="capsule" density="100" />
                     <geom type="sphere" size="0.1" name="ball2" rgba="0 0.7 0.7 1" pos="0 0 -.4" />
-                    <body name="pole3" pos="0 0 -.4">
+                    <!-- <body name="pole3" pos="0 0 -.4">
                         <joint axis="0 1 0" name="hinge3" pos="0 0 0" type="hinge" />
                         <geom fromto="0 0 0 0.001 0 -0.4" name="cpole3" rgba="0 0.7 0.7 1" size="0.02 0.3" type="capsule" density="100" />
                         <geom type="sphere" size="0.1" name="ball3" rgba="0 0.7 0.7 1" pos="0 0 -.4" />
-                    </body>
+                    </body> -->
                 </body>
 			</body>
 		</body>

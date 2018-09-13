@@ -4,7 +4,7 @@
 #include <range/v3/view.hpp> 
 
 #include "utilities.hpp"
-#include "constraintNew.hpp"
+#include "constraint.hpp"
 
 
 namespace trajectoryOptimization::cost{

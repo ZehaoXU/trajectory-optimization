@@ -28,96 +28,108 @@ public:
 
     mjModel* _m;
     mjData* _d;
+    const double dt = 0.5;
 };
 
-TEST_F(MujocoTest, 2DControlZero)
+TEST_F(MujocoTest, getAcceleration2DControlZero)
 {
     dvector position = {1, 2};
     dvector velocity = {0, 0};
     dvector control = {0, 0};
-    int worldDimension = 2;
+    const int worldDimension = 2;
+    const int controlDimension = 2;
 
-    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension);
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension, controlDimension, dt);
     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
     dvector acceleration(acc, acc + worldDimension);
 
     EXPECT_THAT(acceleration, ElementsAre(0, 0));
 }
 
-TEST_F(MujocoTest, 2DControlOne)
+TEST_F(MujocoTest, getAcceleration2DControlOne)
 {
     dvector position = {1, 2};
     dvector velocity = {0, 0};
     dvector control = {1, 0};
-    int worldDimension = 2;
+    const int worldDimension = 2;
+    const int controlDimension = 2;
 
-    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension);
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension, controlDimension, dt);
     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
     dvector acceleration(acc, acc + worldDimension);
 
     EXPECT_THAT(acceleration, ElementsAre(1, 0));
 }
 
-TEST_F(MujocoTest, 2DControlOneTwo)
+TEST_F(MujocoTest, getAcceleration2DControlOneTwo)
 {
     dvector position = {1, 2};
     dvector velocity = {0, 0};
     dvector control = {1, 2};
-    int worldDimension = 2;
+    const int worldDimension = 2;
+    const int controlDimension = 2;
 
-    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension);
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension, controlDimension, dt);
     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
     dvector acceleration(acc, acc + worldDimension);
 
     EXPECT_THAT(acceleration, ElementsAre(1, 2));
 }
 
-TEST_F(MujocoTest, controlZero)
+TEST_F(MujocoTest, getAccelerationControlZero)
 {
     dvector position = {1, 2, 0};
     dvector velocity = {0, 0, 0};
     dvector control = {0, 0, 0};
+    const int worldDimension = 3;
+    const int controlDimension = 3;
 
-    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension, controlDimension, dt);
     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
     dvector acceleration(acc, acc + 3);
 
     EXPECT_THAT(acceleration, ElementsAre(0, 0, 0));
 }
 
-TEST_F(MujocoTest, controlOne)
+TEST_F(MujocoTest, getAccelerationControlOne)
 {
     dvector position = {1, 2, 0};
     dvector velocity = {0, 0, 0};
     dvector control = {1, 0, 0};
+    const int worldDimension = 3;
+    const int controlDimension = 3;
 
-    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension, controlDimension, dt);
     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
     dvector acceleration(acc, acc + 3);
 
     EXPECT_THAT(acceleration, ElementsAre(1, 0, 0));
 }
 
-TEST_F(MujocoTest, controlOneTwo)
+TEST_F(MujocoTest, getAccelerationControlOneTwo)
 {
     dvector position = {1, 2, 0};
     dvector velocity = {0, 0, 0};
     dvector control = {1, 2, 0};
+    const int worldDimension = 3;
+    const int controlDimension = 3;
 
-    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension, controlDimension, dt);
     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
     dvector acceleration(acc, acc + 3);
 
     EXPECT_THAT(acceleration, ElementsAre(1, 2, 0));
 }
 
-TEST_F(MujocoTest, controlOneTwoThree)
+TEST_F(MujocoTest, getAccelerationControlOneTwoThree)
 {
     dvector position = {1, 2, 0};
     dvector velocity = {0, 0, 0};
     dvector control = {1, 2, 3};
+    const int worldDimension = 3;
+    const int controlDimension = 3;
 
-    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d);
+    auto getAcceleration = GetAccelerationUsingMujoco(_m, _d, worldDimension, controlDimension, dt);
     auto acc = getAcceleration(position.data(), velocity.data(), control.data());
     dvector acceleration(acc, acc + 3);
 
@@ -194,15 +206,17 @@ TEST_F(MujocoTest, getPositionVelocityControlOneTwo)
     EXPECT_NEAR(nextVelocity[2], 0, 1e-5);
 }
 
-TEST_F(MujocoTest, getContactForceNotTouch)
+TEST_F(MujocoTest, getContactForceNoCollision)
 {
     dvector position = {1, 1, 0};
     dvector velocity = {2, 2, 0};
     dvector control = {1, 2, 0};
+    const int worldDimension = 3;
+    const int contactForceDimension = 6;
     
-    auto getContactForce = GetContactForceUsingMujoco(_m, _d);
+    auto getContactForce = GetContactForceUsingMujoco(_m, _d, worldDimension, dt);
     auto frc = getContactForce(position.data(), velocity.data(), control.data());
-    dvector force(frc, frc + 6);
+    dvector force(frc, frc + contactForceDimension);
     EXPECT_THAT(force, ElementsAre(0, 0, 0, 0, 0, 0));
 }
 

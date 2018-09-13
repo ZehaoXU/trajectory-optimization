@@ -43,9 +43,8 @@ namespace trajectoryOptimization::constraint {
 			const auto differenceSquare = [](const auto scaler1, const auto scaler2)
 												{ return std::pow(scaler1 - scaler2, 2); };
 			const auto currentKinematicsStartPtr = trajectoryPtr+kinematicStartIndex;
-			//TODO: control ignored?
 
-			std::vector<double> toKinematicGoalSquare(kinematicDimension);
+			std::vector<double> toKinematicGoalSquare;
 			std::transform(kinematicDimensionRange.begin(), kinematicDimensionRange.end(),
 							toKinematicGoalSquare.begin(),
 							[&] (const unsigned kinematicIndex) {
@@ -56,8 +55,8 @@ namespace trajectoryOptimization::constraint {
 		}
 	};
 
-	class GetKinematicViolation {
-		const DynamicFunction dynamics;
+	class GetKinematicViolationUsingBlockDynamics {
+		const DynamicFunctionBlock dynamics;
 		const unsigned pointDimension;
 		const unsigned positionDimension;
 		const unsigned timeIndex;
@@ -69,7 +68,7 @@ namespace trajectoryOptimization::constraint {
 		const std::vector<unsigned> positionDimensionRange;
 
 		public:
-			GetKinematicViolation(const DynamicFunction dynamics,
+			GetKinematicViolationUsingBlockDynamics(const DynamicFunctionBlock dynamics,
 									const unsigned pointDimension,
 									const unsigned positionDimension,
 									const unsigned timeIndex,
@@ -131,6 +130,135 @@ namespace trajectoryOptimization::constraint {
 
 				return kinematicViolation;
 			};
+		};
+
+	class GetKinematicViolationUsingMujoco {
+		const DynamicFunctionMujoco dynamics;
+		const unsigned pointDimension;
+		const unsigned positionDimension;
+		const unsigned timeIndex;
+		const double dt;
+		const unsigned velocityDimension;
+		const unsigned controlDimension;
+		const int currentKinematicsStartIndex;
+		const int nextKinematicsStartIndex;
+		const std::vector<unsigned> positionDimensionRange;
+
+		public:
+			GetKinematicViolationUsingMujoco(const DynamicFunctionMujoco dynamics,
+									const unsigned pointDimension,
+									const unsigned positionDimension,
+									const unsigned timeIndex,
+									const double dt):
+										dynamics(dynamics),
+										pointDimension(pointDimension),
+										positionDimension(positionDimension),
+										timeIndex(timeIndex),
+										dt(dt),
+										velocityDimension(positionDimension),
+										controlDimension(pointDimension - positionDimension - velocityDimension),
+										currentKinematicsStartIndex(timeIndex * pointDimension),
+										nextKinematicsStartIndex((timeIndex+1) * pointDimension),
+										positionDimensionRange(ranges::view::ints((unsigned) 0, positionDimension)) {
+											assert(positionDimension == velocityDimension);
+										}
+
+			std::vector<double> operator() (const double* trajectoryPointer) {
+
+				const auto nowPosition = trajectoryPointer + currentKinematicsStartIndex;
+				const auto nextPosition = trajectoryPointer + nextKinematicsStartIndex;
+
+				const auto nowVelocity = nowPosition + positionDimension;
+				const auto nextVelocity = nextPosition + positionDimension;
+
+				const auto nowControl = nowVelocity + velocityDimension;
+				const auto nextControl = nextVelocity + velocityDimension;
+
+				const auto nowAcc = dynamics(nowPosition, nowVelocity, nowControl);
+				dvector nowAcceleration(nowAcc, nowAcc + velocityDimension);
+
+				const auto nextAcc = dynamics(nextPosition, nextVelocity, nextControl);
+				dvector nextAcceleration(nextAcc, nextAcc + velocityDimension);
+				
+				const auto average = [](const auto val1, const auto val2) { return 0.5 * (val1 + val2); };
+				const auto getViolation = [&](const auto now, const auto next, const auto dNow, const auto dNext)
+						{ return (next - now) - average(dNow, dNext)*dt; };
+
+				std::vector<double> kinematicViolation(positionDimension+velocityDimension);
+
+				std::transform(positionDimensionRange.begin(), positionDimensionRange.end(),
+								kinematicViolation.begin(),
+								[nowPosition, nextPosition, nowVelocity, nextVelocity, getViolation](const auto index) {
+									return getViolation(nowPosition[index], nextPosition[index], nowVelocity[index], nextVelocity[index]);
+								});
+
+				std::transform(positionDimensionRange.begin(), positionDimensionRange.end(),
+								kinematicViolation.begin() + positionDimension,
+								[nowVelocity, nextVelocity, nowAcceleration, nextAcceleration, getViolation](const auto index) {
+									return getViolation(nowVelocity[index], nextVelocity[index], nowAcceleration[index], nextAcceleration[index]);
+								});
+
+				return kinematicViolation;
+			};
+	};
+
+	class GetContactForceSquare
+	{
+	  private:
+		const DynamicFunctionMujoco getContactForce;
+		const unsigned pointDimension;
+		const unsigned positionDimension;
+		const unsigned timeIndex;
+		const double dt;
+		const unsigned velocityDimension;
+		const unsigned controlDimension;
+		const int currentKinematicsStartIndex;
+		const int nextKinematicsStartIndex;
+		const unsigned contactForceDimension;
+		std::vector<unsigned> forceDimensionRange;
+
+		public:
+			GetContactForceSquare(const DynamicFunctionMujoco getContactForce,
+									const unsigned pointDimension,
+									const unsigned positionDimension,
+									const unsigned timeIndex,
+									const double dt):
+										getContactForce(getContactForce),
+										pointDimension(pointDimension),
+										positionDimension(positionDimension),
+										timeIndex(timeIndex),
+										dt(dt),
+										velocityDimension(positionDimension),
+										controlDimension(pointDimension - positionDimension - velocityDimension),
+										currentKinematicsStartIndex(timeIndex * pointDimension),
+										nextKinematicsStartIndex((timeIndex+1) * pointDimension),
+										contactForceDimension(2),
+										forceDimensionRange(ranges::view::ints((unsigned) 0, contactForceDimension)) {
+											assert(positionDimension == velocityDimension);
+										}
+			std::vector<double> operator() (const double* trajectoryPointer)
+			{
+				const auto nowPosition = trajectoryPointer + currentKinematicsStartIndex;
+
+				const auto nowVelocity = nowPosition + positionDimension;
+
+				const auto nowControl = nowVelocity + velocityDimension;
+
+				const auto force = getContactForce(nowPosition, nowVelocity, nowControl);
+				std::vector<mjtNum> contactForce(force, force + contactForceDimension);
+				
+				const auto getSquare = [&](const auto val) { return std::pow(val, 2); };
+			
+				std::vector<double> forceSquare(contactForceDimension);
+
+				std::transform(forceDimensionRange.begin(), forceDimensionRange.end(),
+								forceSquare.begin(),
+								[contactForce](const auto index) {
+									return std::log2(std::abs(contactForce[index] + 1));
+								});
+
+				return forceSquare;
+			}
 	};
 
 	class StackConstriants {
@@ -161,24 +289,56 @@ namespace trajectoryOptimization::constraint {
 			}
 	};
 
-	std::vector<ConstraintFunction> applyKinematicViolationConstraints(std::vector<ConstraintFunction> constraints,
-																		const DynamicFunction blockDynamics,
-							                                            const unsigned timePointDimension,
-							                                            const unsigned worldDimension,
-							                                            const unsigned timeIndexStart,
-							                                            const unsigned timeIndexEndExclusive,
-							                                            const double timeStepSize) {
+	std::vector<ConstraintFunction> applyKinematicViolationConstraintsUsingBlockDynamics(std::vector<ConstraintFunction> constraints,
+																		const DynamicFunctionBlock blockDynamics,
+																		const unsigned timePointDimension,
+																		const unsigned worldDimension,
+																		const unsigned timeIndexStart,
+																		const unsigned timeIndexEndExclusive,
+																		const double timeStepSize) {
 			for (int timeIndex = timeIndexStart; timeIndex < timeIndexEndExclusive; timeIndex++) {
-			    constraints.push_back(constraint::GetKinematicViolation(blockDynamics,
-			                                                            timePointDimension,
-			                                                            worldDimension,
-			                                                            timeIndex,
-			                                                            timeStepSize));
+				constraints.push_back(constraint::GetKinematicViolationUsingBlockDynamics(blockDynamics,
+																			timePointDimension,
+																			worldDimension,
+																			timeIndex,
+																			timeStepSize));
 			}
 
 			return constraints;
 		}
-}
 
-// block dynamics
-// violation calculate
+	std::vector<ConstraintFunction> applyKinematicViolationConstraintsUsingMujoco(std::vector<ConstraintFunction> constraints,
+																		const DynamicFunctionMujoco mujocoDynamics,
+																		const unsigned timePointDimension,
+																		const unsigned worldDimension,
+																		const unsigned timeIndexStart,
+																		const unsigned timeIndexEndExclusive,
+																		const double timeStepSize) {
+			for (int timeIndex = timeIndexStart; timeIndex < timeIndexEndExclusive; timeIndex++) {
+				constraints.push_back(constraint::GetKinematicViolationUsingMujoco(mujocoDynamics,
+																			timePointDimension,
+																			worldDimension,
+																			timeIndex,
+																			timeStepSize));
+			}
+
+		return constraints;
+	}
+	std::vector<ConstraintFunction> applyContactForceSquare(std::vector<ConstraintFunction> constraints,
+																		const DynamicFunctionMujoco getContactForce,
+																		const unsigned timePointDimension,
+																		const unsigned worldDimension,
+																		const unsigned timeIndexStart,
+																		const unsigned timeIndexEndInclusive,
+																		const double timeStepSize) {
+			for (int timeIndex = timeIndexStart; timeIndex <= timeIndexEndInclusive; timeIndex++) {
+				constraints.push_back(constraint::GetContactForceSquare(getContactForce,
+																			timePointDimension,
+																			worldDimension,
+																			timeIndex,
+																			timeStepSize));
+			}
+
+		return constraints;
+	}
+}

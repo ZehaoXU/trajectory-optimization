@@ -144,7 +144,7 @@ int timeIndex = 0;
 vector<mjvGeom> geoms;
 
 // initialize trajectroy
-void initializeTrajectory(string dir)
+void setInitialTrajectory(string dir)
 {
     dataFile.open(dir.c_str());
     string line;
@@ -1392,7 +1392,7 @@ int main(int argc, const char** argv)
     if( argc==2 )
         data_dir = argv[1];
 
-    initializeTrajectory(data_dir);
+    setInitialTrajectory(data_dir);
     const char* model = model_dir.c_str();
     loadmodel(window, model);
     cout << timeStep << "  " << pointDimension << "  " << numberOfPoints << "  " << trajectory.size() << endl;
