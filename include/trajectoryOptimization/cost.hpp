@@ -4,6 +4,7 @@
 #include <range/v3/view.hpp> 
 
 #include "utilities.hpp"
+#include "dynamic.hpp"
 #include "constraint.hpp"
 
 
@@ -22,7 +23,6 @@ namespace trajectoryOptimization::cost{
 		const int controlEndIndex;
 		const int worldDimension;
 		std::vector<unsigned> controlIndices;
-		DynamicFunctionMujoco contactForce;
 		public:
 			GetControlSquareSum(const unsigned numberOfPoints,
 								const unsigned pointDimension,
@@ -56,35 +56,47 @@ namespace trajectoryOptimization::cost{
 
 				std::for_each(controlIndices.begin(), controlIndices.end(), addToControlSquareSum);
 
-				// double contactPositionSquareSum = 0;
-				// const auto addToContactPositionSquareSum = [&] (const unsigned index)
-				// {
-				// 	const auto nowPosition = trajectoryPointer + index * pointDimension;
-				// 	const auto nowVelocity = nowPosition + worldDimension;
-				// 	const auto nowControl = nowVelocity + worldDimension;
-				// 	const auto force = contactForce(nowPosition, nowVelocity, nowControl);
-				// 	contactPositionSquareSum += std::abs(force[0]) * 100;
-				// 	contactPositionSquareSum += std::abs(force[1]) * 100;
-				// 	contactPositionSquareSum += std::abs(force[2]) * 100;
-				// 	contactPositionSquareSum += std::abs(force[6]) * 100;
-				// 	contactPositionSquareSum += std::abs(force[7]) * 100;
-				// 	contactPositionSquareSum += std::abs(force[8]) * 100;
-				// };
-				// std::vector<unsigned> numberOfPointsRange = ranges::view::ints((unsigned) 0, numberOfPoints);
-				// std::for_each(numberOfPointsRange.begin(), numberOfPointsRange.end(), addToContactPositionSquareSum);
-
-				// double zPositionSquareSum = 0;
-				// const auto addTozPositionSquareSum = [&] (const unsigned index)
-				// {
-				// 	const auto nowPosition = trajectoryPointer + index * pointDimension;
-				// 	zPositionSquareSum += std::pow(nowPosition[2], 2);
-				// };
-				// std::for_each(numberOfPointsRange.begin(), numberOfPointsRange.end(), addTozPositionSquareSum);
-
 				return controlSquareSum;
 			}  
 	};
-}//namespace
+
+	// class GetToLastPointGoal{
+	// 	const unsigned numberOfPoints;
+	// 	const unsigned pointDimension;
+	// 	const unsigned controlDimension;
+	// 	const int trajectoryDimension;
+	// 	const int positionDimension;
+	// 	const int velocityDimension;
+	// 	const int targetIndex;
+	// 	const double targetValue;
+	// 	const int goalTimeIndex;	// 1 - numberOfPoints
+
+	// 	public:
+	// 	GetToLastPointGoal(const unsigned numberOfPoints,
+	// 						const unsigned pointDimension,
+	// 						const unsigned controlDimension,
+	// 						const int goalTimeIndex,
+	// 						const double targetValue):
+	// 						numberOfPoints(numberOfPoints),
+	// 						pointDimension(pointDimension),
+	// 						controlDimension(controlDimension),
+	// 						trajectory(numberOfPoints * pointDimension),
+	// 						positionDimension((pointDimension - controlDimension) / 2),
+	// 						velocityDimension((pointDimension - controlDimension) / 2),
+	// 						targetValue(targetValue),
+	// 						goalTimeIndex(goalTimeIndex)
+	// 						{
+	// 							assert(goalTimeIndex <= numberOfPoints);
+	// 							targetIndex = (goalTimeIndex - 1) * pointDimension + goalIndex;
+	// 						}
+	// 	double operator()(const double* trajectoryPointer) const 
+	// 	{
+	// 		double toGoalSquareSum = 0;
+
+			
+	// 	}
+	// };
+}
 
 
 

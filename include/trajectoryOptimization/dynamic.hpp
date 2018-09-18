@@ -20,6 +20,8 @@ namespace trajectoryOptimization::dynamic {
 	using DynamicFunctionMujoco = std::function<const double* (const double*,
 													const double*,
 													const double*)>;
+	using GetThreeDimensionPositionFunction = std::function<dvector (const double*,
+																const int)>;
 
 	using namespace ranges;
 
@@ -145,6 +147,34 @@ namespace trajectoryOptimization::dynamic {
 
 	};
 
+	class GetThreeDimensionPosition
+	{
+	  private:
+		mjModel* m;
+		mjData* d;
+		const int worldDimension;
+		const int controlDimension;
+		const static int cartesianDimension = 3;
+	  public:
+	  	GetThreeDimensionPosition(const mjModel* model, mjData* data, const int worldDimension, const int controlDimension):
+			worldDimension(worldDimension), controlDimension(controlDimension)
+		{
+			m = mj_copyModel(NULL, model);
+			d = mj_copyData(NULL, m, data);
+		}
+
+		dvector operator()(const double* position, const int bodyNumber)
+		{
+			mju_copy(d->qpos, position, worldDimension);
+			mju_zero(d->qvel, worldDimension);
+			mju_zero(d->ctrl, controlDimension);
+
+			mj_forward(m, d);
+
+			dvector cartesianPosition(d->xpos + cartesianDimension * (bodyNumber - 1), d->xpos + cartesianDimension * bodyNumber);
+			return cartesianPosition;
+		}
+	};
 }
 
 
