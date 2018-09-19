@@ -220,6 +220,46 @@ TEST_F(MujocoTest, getContactForceNoCollision)
     EXPECT_THAT(force, ElementsAre(0, 0, 0, 0, 0, 0));
 }
 
+class CartesianPositionTest : public :: testing :: Test
+{
+protected:
+    mjModel* _m;
+    mjData* _d;
+    const double dt;
+    const int worldDimension;
+    const int controlDimension;
+
+public:
+    void SetUp() override
+    {
+        mj_activate("../../mjkey.txt");    
+        // load and compile model
+        char error[1000] = "ERROR: could not load binary model!";
+        _m = mj_loadXML("../../model/inverted_double_pendulum.xml", 0, error, 1000);
+        _m->opt.timestep = 0.00001;
+        _d = mj_makeData(_m);
+
+        dt = 0.5;
+        worldDimension = 2;
+        controlDimension = 1;
+    }
+
+    void TearDown() override
+    {
+        mj_deleteData(_d);
+        mj_deleteModel(_m);
+        mj_deactivate();
+    }
+};
+
+TEST_F(CartesianPositionTest, getFirstBodyPosition)
+{
+    dvector position = {0, 0};
+    
+    auto get3DPosition = GetThreeDimensionPosition(_m, _d, worldDimension, controlDimension);
+    dvector cartesianPosition = get3DPosition(position.data, 1)
+}
+
 int main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
