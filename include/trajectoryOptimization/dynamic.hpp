@@ -147,7 +147,7 @@ namespace trajectoryOptimization::dynamic {
 
 	};
 
-	class GetThreeDimensionPosition
+	class GetCartesianPosition
 	{
 	  private:
 		mjModel* m;
@@ -156,14 +156,14 @@ namespace trajectoryOptimization::dynamic {
 		const int controlDimension;
 		const static int cartesianDimension = 3;
 	  public:
-	  	GetThreeDimensionPosition(const mjModel* model, mjData* data, const int worldDimension, const int controlDimension):
+	  	GetCartesianPosition(const mjModel* model, mjData* data, const int worldDimension, const int controlDimension):
 			worldDimension(worldDimension), controlDimension(controlDimension)
 		{
 			m = mj_copyModel(NULL, model);
 			d = mj_copyData(NULL, m, data);
 		}
 
-		dvector operator()(const double* position, const int bodyNumber)
+		dvector operator()(const double* position, const int geomNumber)
 		{
 			mju_copy(d->qpos, position, worldDimension);
 			mju_zero(d->qvel, worldDimension);
@@ -171,7 +171,7 @@ namespace trajectoryOptimization::dynamic {
 
 			mj_forward(m, d);
 
-			dvector cartesianPosition(d->xpos + cartesianDimension * (bodyNumber - 1), d->xpos + cartesianDimension * bodyNumber);
+			dvector cartesianPosition(d->geom_xpos + cartesianDimension * (geomNumber - 1), d->geom_xpos + cartesianDimension * geomNumber);
 			return cartesianPosition;
 		}
 	};

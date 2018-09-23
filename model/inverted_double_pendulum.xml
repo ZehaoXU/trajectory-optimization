@@ -1,5 +1,5 @@
 <mujoco model="inverted pendulum">  
-    <option timestep="0.05" iterations="20" gravity="0 0 0">        
+    <option timestep="0.05" iterations="20" gravity="0 0 -9.81">        
         <flag sensornoise="enable"/>
     </option>
 	
