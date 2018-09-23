@@ -28,7 +28,7 @@ class kinematicGoalConstraintTest:public::Test{
 
 TEST_F(kinematicGoalConstraintTest, ZerosWhenReachingGoal){
 	const unsigned goalTimeIndex = 1; 
-	std::vector<double> kinematicGoal = {{2, 3, 4, 5, 6, 7}};
+	std::vector<double> kinematicGoal = {2, 3, 4, 5, 6, 7};
 	const double* trajectoryPtr = trajectory.data();
 	auto getToKinematicGoalSquare =
 		GetToKinematicGoalSquare(numberOfPoints,

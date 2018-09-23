@@ -230,6 +230,8 @@ protected:
     const int controlDimension;
 
 public:
+    CartesianPositionTest():dt(0.5), worldDimension(2), controlDimension(1){}
+
     void SetUp() override
     {
         mj_activate("../../mjkey.txt");    
@@ -239,9 +241,6 @@ public:
         _m->opt.timestep = 0.00001;
         _d = mj_makeData(_m);
 
-        dt = 0.5;
-        worldDimension = 2;
-        controlDimension = 1;
     }
 
     void TearDown() override
@@ -252,12 +251,54 @@ public:
     }
 };
 
-TEST_F(CartesianPositionTest, getFirstBodyPosition)
+TEST_F(CartesianPositionTest, confirmNumberofGeom)
+{
+    int numberOfGeom = _m->ngeom;
+    EXPECT_THAT(numberOfGeom, 6);
+}
+
+TEST_F(CartesianPositionTest, getForthGeomPositionDown)
 {
     dvector position = {0, 0};
+    const int geomNumber = 4;
     
-    auto get3DPosition = GetThreeDimensionPosition(_m, _d, worldDimension, controlDimension);
-    dvector cartesianPosition = get3DPosition(position.data, 1)
+    auto getCartesianPosition = GetCartesianPosition(_m, _d, worldDimension, controlDimension);
+    dvector cartesianPosition = getCartesianPosition(position.data(), geomNumber);
+
+    EXPECT_NEAR(cartesianPosition[2], 0.3, 1e-4);
+}
+
+TEST_F(CartesianPositionTest, getForthGeomPositionUp)
+{
+    dvector position = {3.14159, 0};
+    const int geomNumber = 4;
+    
+    auto getCartesianPosition = GetCartesianPosition(_m, _d, worldDimension, controlDimension);
+    dvector cartesianPosition = getCartesianPosition(position.data(), geomNumber);
+
+    EXPECT_NEAR(cartesianPosition[2], 0.7, 1e-4);
+}
+
+TEST_F(CartesianPositionTest, getSixthGeomPositionDown)
+{
+    dvector position = {0, 0};
+    const int geomNumber = 6;
+    
+    auto getCartesianPosition = GetCartesianPosition(_m, _d, worldDimension, controlDimension);
+    dvector cartesianPosition = getCartesianPosition(position.data(), geomNumber);
+
+    EXPECT_NEAR(cartesianPosition[2], 0.1, 1e-4);
+}
+
+TEST_F(CartesianPositionTest, getSixthGeomPositionUp)
+{
+    dvector position = {3.14159, 0};
+    const int geomNumber = 6;
+    
+    auto getCartesianPosition = GetCartesianPosition(_m, _d, worldDimension, controlDimension);
+    dvector cartesianPosition = getCartesianPosition(position.data(), geomNumber);
+
+    EXPECT_NEAR(cartesianPosition[2], 0.9, 1e-4);
 }
 
 int main(int argc, char** argv)
