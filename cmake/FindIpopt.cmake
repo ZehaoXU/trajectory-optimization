@@ -82,7 +82,7 @@ if(NOT WIN32)
     if(IPOPT_DIR_TEST)
       set(IPOPT_DIR $ENV{IPOPT_DIR} CACHE PATH "Path to IPOPT build directory")
     else()
-      set(IPOPT_DIR /home/jaspr/Ipopt/Ipopt-3.12.10/build            CACHE PATH "Path to IPOPT build directory")
+      set(IPOPT_DIR /home/taharabun/Documents/Ipopt-3.12.10/build CACHE PATH "Path to IPOPT build directory")
     endif()
 
     set(IPOPT_INCLUDE_DIRS ${IPOPT_DIR}/include/coin)

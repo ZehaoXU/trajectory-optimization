@@ -1037,7 +1037,7 @@ void makeoptionstring(const char* name, char key, char* buf)
 void setPosition(int index)
 {
     for (int i = 0; i < positionDimension; i++)
-        d->qpos[i] = trajectory[index * pointDimension + i];
+    d->qpos[i] = trajectory[index * pointDimension + i];
     mju_zero(d->qvel, positionDimension);
     mju_zero(d->ctrl, positionDimension);
     mju_zero(d->qfrc_applied, m->nv);

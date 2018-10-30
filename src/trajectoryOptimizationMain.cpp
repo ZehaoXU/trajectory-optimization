@@ -65,9 +65,9 @@ int main(int argv, char* argc[])
     return costGradientFunction(x);
   };
 
-  std::vector<constraint::ConstraintFunction> constraints;
+  std::vector<constraintNew::ConstraintFunction> constraints;
 
-  constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
+  constraints.push_back(constraintNew::GetToKinematicGoalSquare(numTimePoints,
                                                               timePointDimension,
                                                               kinematicDimension,
                                                               startTimeIndex,
@@ -75,7 +75,7 @@ int main(int argv, char* argc[])
   
   const unsigned randomTargetTimeIndex = 45;
   const std::vector<double> randomTarget = {4, 4, 0, 0, 0, 0, 0, 0, 0};
-  // constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
+  // constraints.push_back(constraintNew::GetToKinematicGoalSquare(numTimePoints,
   //                                                             timePointDimension,
   //                                                             kinematicDimension,
   //                                                             randomTargetTimeIndex,
@@ -83,14 +83,14 @@ int main(int argv, char* argc[])
   
   const unsigned kinematicViolationConstraintStartIndex = 0;
   const unsigned kinematicViolationConstraintEndIndex = kinematicViolationConstraintStartIndex + numTimePoints - 1;
-  constraints = constraint::applyKinematicViolationConstraintsUsingMujoco(constraints,
+  constraints = constraintNew::applyKinematicViolationConstraintsUsingMujoco(constraints,
                                                                 mujocoDynamics,
                                                                 timePointDimension,
                                                                 worldDimension,
                                                                 kinematicViolationConstraintStartIndex,
                                                                 kinematicViolationConstraintEndIndex,
                                                                 timeStepSize);
-  // constraints = constraint::applyContactForceSquare(constraints,
+  // constraints = constraintNew::applyContactForceSquare(constraints,
   //                                                   contactForce,
   //                                                   timePointDimension,
   //                                                   worldDimension,
@@ -98,13 +98,13 @@ int main(int argv, char* argc[])
   //                                                   kinematicViolationConstraintEndIndex,
   //                                                   timeStepSize);
 
-  constraints.push_back(constraint::GetToKinematicGoalSquare(numTimePoints,
+  constraints.push_back(constraintNew::GetToKinematicGoalSquare(numTimePoints,
                                                                 timePointDimension,
                                                                 kinematicDimension,
                                                                 goalTimeIndex,
                                                                 goalPoint));
   
-  const constraint::ConstraintFunction stackedConstraintFunction = constraint::StackConstriants(numberVariablesX, constraints);
+  const constraintNew::ConstraintFunction stackedConstraintFunction = constraintNew::StackConstriants(numberVariablesX, constraints);
   const unsigned numberConstraintsG = stackedConstraintFunction(xStartingPoint.data()).size();
   const numberVector gLowerBounds(numberConstraintsG);
   const numberVector gUpperBounds(numberConstraintsG);
@@ -113,7 +113,7 @@ int main(int argv, char* argc[])
   };
   
   indexVector jacStructureRows, jacStructureCols;
-  constraint::ConstraintGradientFunction evaluateJacobianValueFunction;
+  constraintNew::ConstraintGradientFunction evaluateJacobianValueFunction;
   std::tie(jacStructureRows, jacStructureCols, evaluateJacobianValueFunction) =
       derivative::getSparsityPatternAndJacobianFunctionOfVectorToVectorFunction(stackedConstraintFunction, numberVariablesX);
 
